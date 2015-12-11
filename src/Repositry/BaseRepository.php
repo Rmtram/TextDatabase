@@ -17,6 +17,8 @@ abstract class BaseRepository
 
     protected $entityClass;
 
+    protected $data;
+
     public function __construct()
     {
         $this->assertTable($this->table);
@@ -27,7 +29,24 @@ abstract class BaseRepository
     public function save(BaseEntity $entity)
     {
         $this->assertEntity($entity, $this->entityClass);
+        if ($this->validate($entity)) {
+            return false;
+        }
+        $this->data[] = $entity();
+        serialize($this);
+        return true;
+    }
 
+    public function validate(BaseEntity $entity)
+    {
+        foreach ($this->fields as $fieldName => $variable) {
+            $v = new \ReflectionMethod($variable, 'validate');
+            $v->setAccessible(true);
+            if (!$v->invoke($entity->{$fieldName})) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function assertTable($table)
@@ -46,25 +65,25 @@ abstract class BaseRepository
 
     private function loadOfAttributes()
     {
-        $attributes = $this->p();
-        foreach ($attributes as $attribute) {
-            if (!is_a($attribute['type'], Variable::class)) {
+        $fields = $this->loadOfFields();
+        foreach ($fields as $field) {
+            if (!is_a($field['type'], Variable::class)) {
                 throw new NotVariableClassException(
-                    'not variable class ' . $attribute['type']);
+                    'not variable class ' . $field['type']);
             }
-            $name = $attribute['name'];
+            $name = $field['name'];
             /** @var Variable $variable */
-            $variable = new $attribute['type']($name);
+            $variable = new $field['type']($name);
             $refMethod = new \ReflectionMethod($variable, 'setAttributes');
-            $refMethod->invoke($attributes['attribute']);
-            $this->fields[$attribute['name']] = $attribute['type'];
+            $refMethod->invoke($field['attribute']);
+            $this->fields[$name] = $variable;
         }
     }
 
     /**
      * @return mixed
      */
-    private function p()
+    private function loadOfFields()
     {
         $file = sprintf('%s%s.rtb',
             Connection::getPath(), $this->table);
@@ -73,11 +92,15 @@ abstract class BaseRepository
                 'not exists table ' . $this->table);
         }
         $serialize = file_get_contents($file);
-        $attributes = unserialize($serialize);
-        if (empty($attributes)) {
-            throw new \UnexpectedValueException('empty table attributes');
+        $fields = unserialize($serialize);
+        if (empty($fields)) {
+            throw new \UnexpectedValueException('empty fields');
         }
-        return $attributes;
+        return $fields;
     }
 
+    protected function __sleep()
+    {
+        return $this->data;
+    }
 }
