@@ -5,6 +5,8 @@ namespace Rmtram\TextDatabase\Repository;
 use Rmtram\TextDatabase\Connection;
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\Exceptions\BadPropertyException;
+use Rmtram\TextDatabase\Exceptions\NotVariableClassException;
+use Rmtram\TextDatabase\Variable\Variable;
 
 abstract class BaseRepository
 {
@@ -44,6 +46,26 @@ abstract class BaseRepository
 
     private function loadOfAttributes()
     {
+        $attributes = $this->p();
+        foreach ($attributes as $attribute) {
+            if (!is_a($attribute['type'], Variable::class)) {
+                throw new NotVariableClassException(
+                    'not variable class ' . $attribute['type']);
+            }
+            $name = $attribute['name'];
+            /** @var Variable $variable */
+            $variable = new $attribute['type']($name);
+            $refMethod = new \ReflectionMethod($variable, 'setAttributes');
+            $refMethod->invoke($attributes['attribute']);
+            $this->fields[$attribute['name']] = $attribute['type'];
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    private function p()
+    {
         $file = sprintf('%s%s.rtb',
             Connection::getPath(), $this->table);
         if (!is_file($file)) {
@@ -55,9 +77,7 @@ abstract class BaseRepository
         if (empty($attributes)) {
             throw new \UnexpectedValueException('empty table attributes');
         }
-        foreach ($attributes as $attribute) {
-            $this->fields[$attribute['name']] = $attribute['type'];
-        }
+        return $attributes;
     }
 
 }

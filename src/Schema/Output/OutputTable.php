@@ -53,15 +53,9 @@ class OutputTable implements OutputInterface
         if (true === $this->exists() && false === $overwrite) {
             throw new \RuntimeException('exists table ' . $this->table);
         }
-        $variables = $this->schema->__invoke();
-        $properties = [];
-        /** @var Variable $variable */
-        foreach ($variables as $variable) {
-            $properties[] = $variable();
-        }
-        $serialize = var_export($properties, true);
+        $fields = serialize($this->schema);
         $path = $this->getPath();
-        if (!file_put_contents($path, $serialize)) {
+        if (!file_put_contents($path, $fields)) {
             throw new \RuntimeException('save failed ' . $path);
         }
     }

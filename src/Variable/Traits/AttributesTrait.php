@@ -3,12 +3,19 @@
 namespace Rmtram\TextDatabase\Variable\Traits;
 
 /**
- * Class AttributesTrait
+ * trait AttributesTrait
  * @package Rmtram\TextDatabase\Variable\Traits
- * @property array $attributes
  */
 trait AttributesTrait
 {
+
+    /**
+     * @param array $attributes
+     */
+    protected function setAttributes(array $attributes)
+    {
+        $this->attributes += $attributes;
+    }
 
     /**
      * @param $key

@@ -58,9 +58,13 @@ class Schema
     /**
      * @return array
      */
-    public function __invoke()
+    public function __sleep()
     {
-        return $this->variables;
+        $fields = [];
+        foreach ($this->variables as $variable) {
+            $fields[] = $variable();
+        }
+        return $fields;
     }
 
     /**
@@ -88,5 +92,4 @@ class Schema
         }
         return false;
     }
-
 }
