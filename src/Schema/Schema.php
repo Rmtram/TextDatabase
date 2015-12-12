@@ -46,11 +46,13 @@ class Schema
             throw new \BadMethodCallException(
                 'undefined variable class ' . $className);
         }
-        if (!isset($args[0])) {
+        if (empty($args)) {
             throw new \InvalidArgumentException(
                 'bad arguments empty, ' . $className);
         }
-        $variable = new $this->variableClasses[$className]($args[0]);
+        $reflection = new \ReflectionClass(
+            $this->variableClasses[$className]);
+        $variable = $reflection->newInstanceArgs($args);
         $this->variables[] = $variable;
         return $variable;
     }

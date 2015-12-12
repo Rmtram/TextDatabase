@@ -1,7 +1,7 @@
 <?php
 
 namespace Rmtram\TextDatabase\Schema;
-use Rmtram\TextDatabase\Schema\Output\OutputTable;
+use Rmtram\TextDatabase\Output\SchemaWriter;
 
 /**
  * Class Builder
@@ -9,11 +9,6 @@ use Rmtram\TextDatabase\Schema\Output\OutputTable;
  */
 class Builder
 {
-
-    /**
-     * @var string
-     */
-    private $path;
 
     /**
      * @var bool
@@ -26,20 +21,16 @@ class Builder
     private $schemaClassName = Schema::class;
 
     /**
-     * @param string $path
+     * constructor.
      */
-    protected function __construct($path)
-    {
-        $this->path = $path;
-    }
+    protected function __construct() {}
 
     /**
-     * @param string $path
      * @return static
      */
-    public static function make($path)
+    public static function make()
     {
-        return new static($path);
+        return new static();
     }
 
     /**
@@ -77,8 +68,8 @@ class Builder
         /** @var Schema $schema */
         $schema = new $this->schemaClassName;
         $closure($schema);
-        $output = new OutputTable($table, $this->path, $schema);
-        $output->save($this->overwrite);
+        $writer = new SchemaWriter($table, $schema);
+        $writer->write($this->overwrite);
     }
 
 }

@@ -10,6 +10,7 @@ use Rmtram\TextDatabase\Repository\Query\Selector;
 use Rmtram\TextDatabase\Repository\Traits\AssertTrait;
 use Rmtram\TextDatabase\Repository\Traits\ValidateTrait;
 use Rmtram\TextDatabase\Variable\Variable;
+use Rmtram\TextDatabase\Writer\StorageWriter;
 
 abstract class BaseRepository
 {
@@ -44,8 +45,8 @@ abstract class BaseRepository
             return false;
         }
         $this->data[] = $entity();
-        $file = new File($this->getStoragePath());
-        return $file->write(serialize($this));
+        $writer = new StorageWriter($this->table, $this->data);
+        return $writer->write();
     }
 
     private function loadOfAttributes()
@@ -81,14 +82,6 @@ abstract class BaseRepository
             throw new \UnexpectedValueException('empty fields');
         }
         return $fields;
-    }
-
-    private function getStoragePath()
-    {
-        return sprintf('%s%s.%s',
-            Connection::getPath(),
-            $this->table,
-            Connection::getStorageExtension());
     }
 
     private function getSchemaPath()

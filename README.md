@@ -16,5 +16,4 @@ Builder::table('posts', function(Schema $schema) {
     $schema->dateTime('created');
     $schema->dateTime('updated')->null();
 });
-
 ```
