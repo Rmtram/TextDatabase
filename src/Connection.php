@@ -4,6 +4,17 @@ namespace Rmtram\TextDatabase;
 
 final class Connection
 {
+
+    /**
+     * @var string
+     */
+    private static $schemaExtension = 'rtb';
+
+    /**
+     * @var string
+     */
+    private static $storageExtension = 'rst';
+
     /**
      * @var string
      */
@@ -24,4 +35,15 @@ final class Connection
     {
         static::$path = $path;
     }
+
+    public static function getSchemaExtension()
+    {
+        return static::$schemaExtension;
+    }
+
+    public static function getStorageExtension()
+    {
+        return static::$storageExtension;
+    }
+
 }

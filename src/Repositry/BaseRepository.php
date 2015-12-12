@@ -2,14 +2,20 @@
 
 namespace Rmtram\TextDatabase\Repository;
 
+use Cake\Filesystem\File;
 use Rmtram\TextDatabase\Connection;
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\Exceptions\BadPropertyException;
 use Rmtram\TextDatabase\Exceptions\NotVariableClassException;
+use Rmtram\TextDatabase\Repository\Query\Selector;
+use Rmtram\TextDatabase\Repository\Traits\AssertTrait;
+use Rmtram\TextDatabase\Repository\Traits\ValidateTrait;
 use Rmtram\TextDatabase\Variable\Variable;
 
 abstract class BaseRepository
 {
+
+    use AssertTrait;
+    use ValidateTrait;
 
     protected $fields;
 
@@ -26,6 +32,11 @@ abstract class BaseRepository
         $this->loadOfAttributes();
     }
 
+    public function find()
+    {
+        return new Selector($this->data);
+    }
+
     public function save(BaseEntity $entity)
     {
         $this->assertEntity($entity, $this->entityClass);
@@ -33,34 +44,8 @@ abstract class BaseRepository
             return false;
         }
         $this->data[] = $entity();
-        serialize($this);
-        return true;
-    }
-
-    public function validate(BaseEntity $entity)
-    {
-        foreach ($this->fields as $fieldName => $variable) {
-            $v = new \ReflectionMethod($variable, 'validate');
-            $v->setAccessible(true);
-            if (!$v->invoke($entity->{$fieldName})) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private function assertTable($table)
-    {
-        if (empty($table) || !is_string($table)) {
-            throw new BadPropertyException('bad invalid table');
-        }
-    }
-
-    private function assertEntity($entity, $actual = BaseEntity::class)
-    {
-        if (is_a($entity, $actual)) {
-            throw new BadPropertyException('bad invalid entity');
-        }
+        $file = new File($this->getStoragePath());
+        return $file->write(serialize($this));
     }
 
     private function loadOfAttributes()
@@ -85,18 +70,33 @@ abstract class BaseRepository
      */
     private function loadOfFields()
     {
-        $file = sprintf('%s%s.rtb',
-            Connection::getPath(), $this->table);
-        if (!is_file($file)) {
+        $file = new File($this->getSchemaPath());
+        if (!$file->readable()) {
             throw new \RuntimeException(
                 'not exists table ' . $this->table);
         }
-        $serialize = file_get_contents($file);
+        $serialize = $file->read();
         $fields = unserialize($serialize);
         if (empty($fields)) {
             throw new \UnexpectedValueException('empty fields');
         }
         return $fields;
+    }
+
+    private function getStoragePath()
+    {
+        return sprintf('%s%s.%s',
+            Connection::getPath(),
+            $this->table,
+            Connection::getStorageExtension());
+    }
+
+    private function getSchemaPath()
+    {
+        return sprintf('%s%s.%s',
+            Connection::getPath(),
+            $this->table,
+            Connection::getSchemaExtension());
     }
 
     protected function __sleep()

@@ -2,7 +2,8 @@
   "require": {
     "nesbot/carbon": "~1.21",
     "respect/validation": "~1.0",
-    "braincrafted/arrayquery": "dev-master"
+    "braincrafted/arrayquery": "dev-master",
+    "cakephp/filesystem": "~3.1"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0"
