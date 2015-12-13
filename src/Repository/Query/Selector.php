@@ -59,6 +59,14 @@ class Selector
     }
 
     /**
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->all());
+    }
+
+    /**
      * @return array
      */
     public function all()
