@@ -29,6 +29,7 @@ class Integer extends Variable
      */
     protected function validate($expression)
     {
+        return true;
     }
 
 }

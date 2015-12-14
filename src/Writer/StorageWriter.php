@@ -36,7 +36,7 @@ class StorageWriter extends AbstractWriter
         return sprintf('%s%s.%s',
             Connection::getPath(),
             $this->table,
-            Connection::getSchemaExtension());
+            Connection::getStorageExtension());
     }
 
     /**

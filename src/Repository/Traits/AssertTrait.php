@@ -16,7 +16,7 @@ trait AssertTrait
 
     private function assertEntity($entity, $actual = BaseEntity::class)
     {
-        if (is_a($entity, $actual)) {
+        if (!is_a($entity, $actual, true)) {
             throw new BadPropertyException('bad invalid entity');
         }
     }

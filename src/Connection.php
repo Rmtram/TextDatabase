@@ -13,7 +13,7 @@ final class Connection
     /**
      * @var string
      */
-    private static $storageExtension = 'rst';
+    private static $storageExtension = 'rtd';
 
     /**
      * @var string

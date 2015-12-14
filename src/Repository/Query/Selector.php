@@ -2,7 +2,10 @@
 
 namespace Rmtram\TextDatabase\Repository\Query;
 
-use Braincrafted\ArrayQuery\ArrayQuery;
+use Braincrafted\ArrayQuery\Operator\EqualOperator;
+use Braincrafted\ArrayQuery\Operator\GreaterOperator;
+use Braincrafted\ArrayQuery\Operator\LikeOperator;
+use Braincrafted\ArrayQuery\Operator\NotEqualOperator;
 use Braincrafted\ArrayQuery\SelectEvaluation;
 use Braincrafted\ArrayQuery\WhereEvaluation;
 
@@ -13,7 +16,7 @@ use Braincrafted\ArrayQuery\WhereEvaluation;
 class Selector
 {
     /**
-     * @var ArrayQuery
+     * @var Query
      */
     private $query;
 
@@ -24,14 +27,21 @@ class Selector
 
     /**
      * constructor.
+     * @param $entityClass
      * @param array $data
      */
-    public function __construct(array &$data)
+    public function __construct($entityClass, array &$data)
     {
         $this->data = $data;
-        $this->query = new ArrayQuery(
+        $we = new WhereEvaluation();
+        $we->addOperator(new EqualOperator());
+        $we->addOperator(new GreaterOperator());
+        $we->addOperator(new LikeOperator());
+        $we->addOperator(new NotEqualOperator());
+        $this->query = new Query(
+            $entityClass,
             new SelectEvaluation(),
-            new WhereEvaluation()
+            $we
         );
     }
 
@@ -67,23 +77,23 @@ class Selector
     }
 
     /**
-     * @return array
+     * @return array[\Rmtram\TextDatabase\Entity\BaseEntity]
      */
     public function all()
     {
         return $this->query
             ->from($this->data)
-            ->findAll();
+            ->get();
     }
 
     /**
-     * @return array
+     * @return \Rmtram\TextDatabase\Entity\BaseEntity
      */
     public function first()
     {
         return $this->query
             ->from($this->data)
-            ->findOne();
+            ->get(true);
     }
 
 }

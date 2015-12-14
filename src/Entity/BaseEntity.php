@@ -6,6 +6,26 @@ use Traversable;
 
 class BaseEntity implements \IteratorAggregate
 {
+    /**
+     * @param string $field
+     * @param string $val
+     */
+    public function set($field, $val)
+    {
+        if (property_exists($this, $field)) {
+            $this->{$field} = $val;
+        }
+    }
+
+    /**
+     * @param array $item
+     */
+    public function setArray(array $item)
+    {
+        foreach ($item as $field => $val) {
+            $this->set($field, $val);
+        }
+    }
 
     /**
      * @return array

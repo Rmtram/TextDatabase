@@ -60,7 +60,7 @@ class Schema
     /**
      * @return array
      */
-    public function __sleep()
+    public function __invoke()
     {
         $fields = [];
         foreach ($this->variables as $variable) {

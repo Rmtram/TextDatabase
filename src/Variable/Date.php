@@ -2,6 +2,8 @@
 
 namespace Rmtram\TextDatabase\Variable;
 
+use Respect\Validation\Validator;
+
 class Date extends Variable
 {
     /**

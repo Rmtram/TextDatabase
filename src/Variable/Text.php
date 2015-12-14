@@ -11,6 +11,6 @@ class Text extends Variable
      */
     protected function validate($expression)
     {
-        // TODO: Implement validate() method.
+        return true;
     }
 }

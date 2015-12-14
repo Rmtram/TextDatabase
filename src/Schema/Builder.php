@@ -1,7 +1,7 @@
 <?php
 
 namespace Rmtram\TextDatabase\Schema;
-use Rmtram\TextDatabase\Output\SchemaWriter;
+use Rmtram\TextDatabase\Writer\SchemaWriter;
 
 /**
  * Class Builder
