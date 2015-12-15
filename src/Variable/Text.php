@@ -4,6 +4,7 @@ namespace Rmtram\TextDatabase\Variable;
 
 class Text extends Variable
 {
+
     /**
      * Validate.
      * @param mixed $expression

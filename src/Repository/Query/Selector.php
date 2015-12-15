@@ -62,10 +62,20 @@ class Selector
      * @param array $filters
      * @return $this
      */
-    public function where($key, $operator = '=', $value, array $filters = array())
+    public function where($key, $value, $operator = '=', array $filters = array())
     {
         $this->query->where($key, $value, $operator, $filters);
         return $this;
+    }
+
+    /**
+     * @return bool|int
+     */
+    public function indexNumber()
+    {
+        return $this->query
+            ->from($this->data)
+            ->getIndexNumber();
     }
 
     /**

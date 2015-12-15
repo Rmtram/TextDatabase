@@ -39,7 +39,7 @@ class Builder
      */
     public function setSchemaClassName($schemaClassName)
     {
-        if (!is_a($schemaClassName, Schema::class)) {
+        if (!is_a($schemaClassName, Schema::class, true)) {
             throw new \RuntimeException(
                 'bad invalid class ' .  $schemaClassName);
         }

@@ -49,6 +49,19 @@ class Query extends ArrayQuery
     }
 
     /**
+     * @return bool|int
+     */
+    public function getIndexNumber()
+    {
+        foreach ($this->from as $index => $item) {
+            if (true === $this->evaluateWhere($item)) {
+                return $index;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param bool $first
      * @return array|BaseEntity
      */

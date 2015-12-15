@@ -5,11 +5,12 @@ namespace Rmtram\TextDatabase\Repository;
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\Exceptions\NotVariableClassException;
 use Rmtram\TextDatabase\Reader\Reader;
+use Rmtram\TextDatabase\Repository\Query\Save;
 use Rmtram\TextDatabase\Repository\Query\Selector;
 use Rmtram\TextDatabase\Repository\Traits\AssertTrait;
+use Rmtram\TextDatabase\Repository\Traits\AssociationTrait;
 use Rmtram\TextDatabase\Repository\Traits\ValidateTrait;
 use Rmtram\TextDatabase\Variable\Variable;
-use Rmtram\TextDatabase\Writer\StorageWriter;
 
 /**
  * Class BaseRepository
@@ -18,13 +19,12 @@ use Rmtram\TextDatabase\Writer\StorageWriter;
 abstract class BaseRepository
 {
 
-    use AssertTrait;
-    use ValidateTrait;
+    use AssertTrait, ValidateTrait, AssociationTrait;
 
     /**
      * @var array
      */
-    protected $fields;
+    protected $fields = [];
 
     /**
      * @var string
@@ -39,7 +39,7 @@ abstract class BaseRepository
     /**
      * @var array
      */
-    protected $data;
+    protected $data = [];
 
     /**
      * constructor.
@@ -50,6 +50,22 @@ abstract class BaseRepository
         $this->assertEntity($this->entityClass);
         $this->loadOfSchema();
         $this->loadOfStorage();
+    }
+
+    /**
+     * @return array
+     */
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
     }
 
     /**
@@ -67,20 +83,8 @@ abstract class BaseRepository
     public function save(BaseEntity $entity)
     {
         $this->assertEntity($entity, $this->entityClass);
-//        if ($this->validate($entity)) {
-//            return false;
-//        }
-        $this->data[] = $entity();
-        $writer = new StorageWriter($this->table, $this->data);
-        return $writer->write(true);
-    }
-
-    /**
-     * @return array
-     */
-    protected function __sleep()
-    {
-        return $this->data;
+        return (new Save($this, $this->data))
+            ->save($entity);
     }
 
     /**
