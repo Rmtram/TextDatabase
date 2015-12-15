@@ -62,6 +62,7 @@ class Builder
     /**
      * @param string $table
      * @param \Closure $closure
+     * @return bool
      */
     public function table($table, \Closure $closure)
     {
@@ -69,7 +70,7 @@ class Builder
         $schema = new $this->schemaClassName;
         $closure($schema);
         $writer = new SchemaWriter($table, $schema);
-        $writer->write($this->overwrite);
+        return $writer->write($this->overwrite);
     }
 
 }

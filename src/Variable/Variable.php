@@ -1,6 +1,7 @@
 <?php
 
 namespace Rmtram\TextDatabase\Variable;
+
 use Rmtram\TextDatabase\Variable\Traits\AttributesTrait;
 use Respect\Validation\Validator;
 
@@ -16,6 +17,13 @@ abstract class Variable
      * @var string
      */
     protected $name;
+
+    protected $forces = [
+        'primary' => [
+            'unique' => true,
+            'null'   => false
+        ]
+    ];
 
     /**
      * @var array
@@ -46,11 +54,27 @@ abstract class Variable
         $this->loadOfDefaultAttributes();
     }
 
+    private function forceChange()
+    {
+        foreach ($this->attributes as $key => &$dist) {
+            if (!array_key_exists($key, $this->forces)) {
+                continue;
+            }
+            if (false === $this->getAttribute($key)) {
+                continue;
+            }
+            foreach ($this->forces[$key] as $attrName => $val) {
+                $this->setAttribute($attrName, $val);
+            }
+        }
+    }
+
     /**
      * @return array
      */
     public function __invoke()
     {
+        $this->forceChange();
         return [
             'type'       => static::class,
             'name'       => $this->name,
@@ -80,9 +104,8 @@ abstract class Variable
      */
     private function mergeAddAttributesToDefault()
     {
-        array_merge(
-            $this->defaultAttributes,
-            $this->addDefaultAttributes);
+        $this->defaultAttributes =
+            $this->addDefaultAttributes + $this->defaultAttributes;
     }
 
     private function loadOfDefaultAttributes()
