@@ -114,7 +114,6 @@ class SaveTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($user->name, 'person1');
     }
 
-
     public function tearDown()
     {
         $this->clear();

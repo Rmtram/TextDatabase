@@ -80,9 +80,8 @@ abstract class Variable
      */
     private function mergeAddAttributesToDefault()
     {
-        array_merge(
-            $this->defaultAttributes,
-            $this->addDefaultAttributes);
+        $this->defaultAttributes =
+            $this->addDefaultAttributes + $this->defaultAttributes;
     }
 
     private function loadOfDefaultAttributes()

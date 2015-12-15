@@ -4,21 +4,24 @@ namespace Rmtram\TextDatabase\Variable;
 
 class Integer extends Variable
 {
+
     /**
+     * @param bool $bool
      * @return $this
      */
-    public function autoIncrement()
+    public function autoIncrement($bool = true)
     {
-        $this->setAttribute('autoIncrement', true);
+        $this->setAttributeOfBool('autoIncrement', $bool);
         return $this;
     }
 
     /**
+     * @param bool $bool
      * @return $this
      */
-    public function unsigned()
+    public function unsigned($bool = true)
     {
-        $this->setAttribute('unsigned', true);
+        $this->setAttributeOfBool('unsigned', $bool);
         return $this;
     }
 

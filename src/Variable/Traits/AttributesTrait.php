@@ -21,6 +21,18 @@ trait AttributesTrait
 
     /**
      * @param $key
+     * @param $bool
+     * @return $this
+     */
+    protected function setAttributeOfBool($key, $bool) {
+        if (is_bool($bool)) {
+            $this->attributes[$key] = $bool;
+        }
+        return $this;
+    }
+
+    /**
+     * @param $key
      * @param $val
      * @return $this
      */
