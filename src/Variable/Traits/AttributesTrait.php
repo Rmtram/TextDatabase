@@ -11,19 +11,23 @@ trait AttributesTrait
 
     /**
      * @param array $attributes
+     * @return $this
      */
     protected function setAttributes(array $attributes)
     {
-        $this->attributes += $attributes;
+        $this->attributes = $attributes + $this->attributes;
+        return $this;
     }
 
     /**
      * @param $key
      * @param $val
+     * @return $this
      */
     protected function setAttribute($key, $val)
     {
         $this->attributes[$key] = $val;
+        return $this;
     }
 
     /**

@@ -13,7 +13,7 @@ final class Connection
     /**
      * @var string
      */
-    private static $storageExtension = 'rst';
+    private static $storageExtension = 'rtd';
 
     /**
      * @var string
@@ -36,11 +36,17 @@ final class Connection
         static::$path = $path;
     }
 
+    /**
+     * @return string
+     */
     public static function getSchemaExtension()
     {
         return static::$schemaExtension;
     }
 
+    /**
+     * @return string
+     */
     public static function getStorageExtension()
     {
         return static::$storageExtension;

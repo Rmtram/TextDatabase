@@ -12,7 +12,7 @@ trait ValidateTrait
         foreach ($this->fields as $fieldName => $variable) {
             $v = new \ReflectionMethod($variable, 'validate');
             $v->setAccessible(true);
-            if (!$v->invoke($entity->{$fieldName})) {
+            if (!$v->invoke($variable, $entity->{$fieldName})) {
                 return false;
             }
         }

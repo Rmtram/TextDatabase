@@ -60,7 +60,7 @@ class Schema
     /**
      * @return array
      */
-    public function __sleep()
+    public function __invoke()
     {
         $fields = [];
         foreach ($this->variables as $variable) {
@@ -75,7 +75,7 @@ class Schema
      */
     protected function addVariableClass($key, $className)
     {
-        if (!is_a($className, Variable::class)) {
+        if (!is_a($className, Variable::class, true)) {
             throw new \RuntimeException(
                 'not variable class ' . $className);
         }

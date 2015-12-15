@@ -4,6 +4,7 @@ namespace Rmtram\TextDatabase\Variable;
 
 class Text extends Variable
 {
+
     /**
      * Validate.
      * @param mixed $expression
@@ -11,6 +12,6 @@ class Text extends Variable
      */
     protected function validate($expression)
     {
-        // TODO: Implement validate() method.
+        return true;
     }
 }

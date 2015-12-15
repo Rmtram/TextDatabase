@@ -1,10 +1,9 @@
 <?php
 
-namespace Rmtram\TextDatabase\Output;
+namespace Rmtram\TextDatabase\Writer;
 
 use Rmtram\TextDatabase\Connection;
 use Rmtram\TextDatabase\Schema\Schema;
-use Rmtram\TextDatabase\Writer\AbstractWriter;
 
 class SchemaWriter extends AbstractWriter
 {
@@ -14,12 +13,6 @@ class SchemaWriter extends AbstractWriter
      * @var string
      */
     private $table;
-
-    /**
-     * path
-     * @var string
-     */
-    private $path;
 
     /**
      * @var Schema
@@ -55,6 +48,6 @@ class SchemaWriter extends AbstractWriter
      */
     protected function export()
     {
-        return serialize($this->schema);
+        return serialize($this->schema->__invoke());
     }
 }

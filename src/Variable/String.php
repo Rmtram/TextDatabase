@@ -1,7 +1,6 @@
 <?php
 
 namespace Rmtram\TextDatabase\Variable;
-use Rmtram\TextDatabase\Validation;
 
 /**
  * Class String
@@ -27,11 +26,6 @@ class String extends Variable
      */
     public function length($size)
     {
-        $v = new Validation($size);
-        $v->modeAssert();
-        $v->notEmpty();
-        $v->regex('/^[0-9]+$/');
-        $v->max(static::MAX_SIZE);
         $this->setAttribute('length', $size);
         return $this;
     }
@@ -43,5 +37,7 @@ class String extends Variable
      */
     protected function validate($expression)
     {
+        return true;
     }
+
 }
