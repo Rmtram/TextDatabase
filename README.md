@@ -1,5 +1,8 @@
 # TextDatabase
-sorry, the application has been creating does not work.
+
+[![Build Status](https://travis-ci.org/Rmtram/TextDatabase.svg)](https://travis-ci.org/Rmtram/TextDatabase)
+
+**Sorry!! the application has been creating does not work.**
 
 ## Introduction
 
