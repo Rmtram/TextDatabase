@@ -1,5 +1,5 @@
 # TextDatabase
-because the application has been creating does not work.
+sorry, the application has been creating does not work.
 
 ## Introduction
 
