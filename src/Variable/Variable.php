@@ -2,6 +2,7 @@
 
 namespace Rmtram\TextDatabase\Variable;
 
+use Rmtram\TextDatabase\Repository\BaseRepository;
 use Rmtram\TextDatabase\Variable\Traits\AttributesTrait;
 use Respect\Validation\Validator;
 
@@ -18,6 +19,9 @@ abstract class Variable
      */
     protected $name;
 
+    /**
+     * @var array
+     */
     protected $forces = [
         'primary' => [
             'unique' => true,
@@ -54,21 +58,6 @@ abstract class Variable
         $this->loadOfDefaultAttributes();
     }
 
-    private function forceChange()
-    {
-        foreach ($this->attributes as $key => &$dist) {
-            if (!array_key_exists($key, $this->forces)) {
-                continue;
-            }
-            if (false === $this->getAttribute($key)) {
-                continue;
-            }
-            foreach ($this->forces[$key] as $attrName => $val) {
-                $this->setAttribute($attrName, $val);
-            }
-        }
-    }
-
     /**
      * @return array
      */
@@ -83,11 +72,27 @@ abstract class Variable
     }
 
     /**
-     * Validate.
-     * @param mixed $expression
+     * @return string
+     */
+    protected function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * check Prohibit value
+     * @param mixed $value
      * @return bool
      */
-    abstract protected function validate($expression);
+    protected function prohibit($value)
+    {
+        if (false === $this->getAttribute('null')) {
+            if (is_null($value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * @param $name
@@ -108,11 +113,34 @@ abstract class Variable
             $this->addDefaultAttributes + $this->defaultAttributes;
     }
 
+    /**
+     * load attribute
+     * @return void
+     */
     private function loadOfDefaultAttributes()
     {
         if (empty($this->defaultAttributes)) {
             return;
         }
         $this->attributes = $this->defaultAttributes;
+    }
+
+    /**
+     * attribute force change.
+     * @return void
+     */
+    private function forceChange()
+    {
+        foreach ($this->attributes as $key => &$d) {
+            if (!array_key_exists($key, $this->forces)) {
+                continue;
+            }
+            if (false === $this->getAttribute($key)) {
+                continue;
+            }
+            foreach ($this->forces[$key] as $attrName => $val) {
+                $this->setAttribute($attrName, $val);
+            }
+        }
     }
 }

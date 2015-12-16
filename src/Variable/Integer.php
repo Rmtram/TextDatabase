@@ -26,13 +26,22 @@ class Integer extends Variable
     }
 
     /**
-     * Validate.
-     * @param mixed $expression
+     * @param mixed $value
      * @return bool
      */
-    protected function validate($expression)
+    protected function prohibit($value)
     {
-        return true;
+        if (true === $this->getAttribute('autoIncrement')) {
+            return false;
+        }
+        if (is_array($value) || is_object($value)) {
+            return true;
+        }
+        if (!preg_match('/^[0-9]+$/', $value)) {
+            return true;
+        }
+        $value = intval($value);
+        return parent::prohibit($value);
     }
 
 }

@@ -3,6 +3,7 @@
 namespace Rmtram\TextDatabase\Variable;
 
 use Respect\Validation\Validator;
+use Rmtram\TextDatabase\Repository\BaseRepository;
 
 class DateTime extends Variable
 {
@@ -13,23 +14,25 @@ class DateTime extends Variable
     private $format = ['y-m-d', 'y-m-d h:i:s'];
 
     /**
-     * @param string|\DateTime $expression
+     * @param string|\DateTime $value
      * @return bool
      */
-    protected function validate($expression)
+    protected function prohibit($value)
     {
-        if ($expression instanceof \DateTime) {
-            return true;
+        if ($value instanceof \DateTime) {
+            $value = $value->format('Y-m-d H:i:s');
         }
-        if (!is_string($expression)) {
-            return false;
-        }
-        foreach ($this->format as $format) {
-            if (Validator::date($format)->validate($expression)) {
+        else {
+            if (!is_string($value)) {
                 return true;
             }
+            foreach ($this->format as $format) {
+                if (!Validator::date($format)->validate($value)) {
+                    return true;
+                }
+            }
         }
-        return false;
+        return parent::prohibit($value);
     }
 
 }

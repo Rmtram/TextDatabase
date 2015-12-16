@@ -6,22 +6,22 @@ use Rmtram\TextDatabase\Repository\BaseRepository;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\Book;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\User;
 
-class UserRepository extends BaseRepository
+class BookRepository extends BaseRepository
 {
     /**
      * @var string
      */
-    protected $table = 'users';
+    protected $table = 'books';
 
     /**
      * @var string
      */
-    protected $entityClass = User::class;
+    protected $entityClass = Book::class;
 
     /**
      * @var array
      */
-    protected $hasMany = [
-        'books' => Book::class
+    protected $belongsTo = [
+        'user' => User::class
     ];
 }
