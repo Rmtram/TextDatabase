@@ -4,10 +4,14 @@ namespace Rmtram\TextDatabase\Repository\Query;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\Repository\BaseRepository;
+use Rmtram\TextDatabase\Repository\Traits\ValidateTrait;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
 class Save
 {
+
+    use ValidateTrait;
+
     /**
      * save update operator
      */
@@ -59,6 +63,9 @@ class Save
      */
     public function save(BaseEntity $entity)
     {
+        if (false === $this->validate($entity)) {
+            return false;
+        }
         $operator = $this->substitution($entity);
         if ($this->write()) {
             return true;

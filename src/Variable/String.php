@@ -1,6 +1,7 @@
 <?php
 
 namespace Rmtram\TextDatabase\Variable;
+use Rmtram\TextDatabase\Repository\BaseRepository;
 
 /**
  * Class String
@@ -31,13 +32,15 @@ class String extends Variable
     }
 
     /**
-     * Validate.
-     * @param mixed $expression
+     * @param mixed $value
      * @return bool
      */
-    protected function validate($expression)
+    protected function prohibit($value)
     {
-        return true;
+        if (is_array($value) || is_object($value)) {
+            return true;
+        }
+        $value = $value ? strval($value) : $value;
+        return parent::prohibit($value);
     }
-
 }

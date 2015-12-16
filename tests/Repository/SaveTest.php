@@ -1,6 +1,6 @@
 <?php
 
-namespace Rmtram\TextDatabase\UnitTest;
+namespace Rmtram\TextDatabase\UnitTest\Repository;
 
 use Rmtram\TextDatabase\Connection;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\User;
@@ -10,9 +10,9 @@ class SaveTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        require_once __DIR__ . '/fixtures/Entity/User.php';
-        require_once __DIR__ . '/fixtures/Repository/UserRepository.php';
-        Connection::setPath(__DIR__ . '/fixtures/storage/');
+        require_once __DIR__ . '/../fixtures/Entity/User.php';
+        require_once __DIR__ . '/../fixtures/Repository/UserRepository.php';
+        Connection::setPath(__DIR__ . '/../fixtures/storage/');
     }
 
     public function testCreateOfObject()
@@ -121,7 +121,7 @@ class SaveTest extends \PHPUnit_Framework_TestCase
 
     private function clear()
     {
-        $iterator = new \RecursiveDirectoryIterator(__DIR__ . '/fixtures/storage/');
+        $iterator = new \RecursiveDirectoryIterator(__DIR__ . '/../fixtures/storage/');
         $iterator = new \RecursiveIteratorIterator($iterator);
         /** @var \SplFileInfo $file */
         foreach ($iterator as $file) {

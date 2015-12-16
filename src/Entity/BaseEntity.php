@@ -21,6 +21,11 @@ class BaseEntity implements \IteratorAggregate
     public function __construct()
     {
         $this->loadOfRepository();
+        $this->association = [
+            'belongsTo' => $this->repository->getBelongsTo(),
+            'hasOne'    => $this->repository->getHasOne(),
+            'hasMany'   => $this->repository->getHasMany()
+        ];
     }
 
     /**
@@ -48,42 +53,72 @@ class BaseEntity implements \IteratorAggregate
 
     /**
      * @param string $key
-     * @return array|BaseEntity
+     * @return array|BaseEntity|null
      */
     public function __get($key)
     {
-        $belongsTo = $this->repository->getBelongsTo();
-        if (array_key_exists($key, $belongsTo)) {
-            $repositoryClass = $belongsTo[$key];
-            /** @var BaseRepository $repo */
-            $repo = new $repositoryClass();
-            $relationKey = $this->createRelationKey($key);
-            return $repo->find()
-                ->where('id', $this->$relationKey)
-                ->first();
-        }
-        $hasMany = $this->repository->getHasMany();
-        if (array_key_exists($key, $hasMany)) {
-            $repositoryClass = $hasMany[$key];
-            /** @var BaseRepository $repo */
-            $repo = new $repositoryClass();
-            $relationKey = $this->createRelationKey($this->repository->getTable());
-            var_dump($relationKey, $this->id);
-            return $repo->find()
-                ->where($relationKey, $this->id)
-                ->all();
-        }
-        $hasOne = $this->repository->getHasOne();
-        if (array_key_exists($key, $hasOne)) {
-            $repositoryClass = $hasOne[$key];
-            /** @var BaseRepository $repo */
-            $repo = new $repositoryClass();
-            $relationKey = $this->createRelationKey($key);
-            return $repo->find()
-                ->where($relationKey, $this->id)
-                ->first();
+        foreach ($this->association as $associationName => $association) {
+            if (array_key_exists($key, $association)) {
+                $entityClass = $association[$key];
+                $entity = new $entityClass();
+                $property = new \ReflectionProperty($entity, 'repository');
+                $property->setAccessible(true);
+                /** @var BaseRepository $repository */
+                $repository = $property->getValue($entity);
+                unset($property, $entity);
+                $fetch = $this->getFetchMethodName($associationName);
+                return $this->$fetch($repository, $key);
+            }
         }
         return null;
+    }
+
+    /**
+     * @param $associationName
+     * @return string
+     */
+    private function getFetchMethodName($associationName)
+    {
+        return 'fetch' . ucfirst($associationName);
+    }
+
+    /**
+     * @param BaseRepository $repository
+     * @param $key
+     * @return BaseEntity
+     */
+    private function fetchBelongsTo(BaseRepository $repository, $key)
+    {
+        $key = $this->createRelationKey($key);
+        return $repository->find()
+            ->where('id', $this->{$key})
+            ->first();
+    }
+
+    /**
+     * @param BaseRepository $repository
+     * @param $key
+     * @return BaseEntity
+     */
+    private function fetchHasMany(BaseRepository $repository, $key)
+    {
+        $key = $this->createRelationKey($this->repository->getTable());
+        return $repository->find()
+            ->where($key, $this->id)
+            ->all();
+    }
+
+    /**
+     * @param BaseRepository $repository
+     * @param $key
+     * @return BaseEntity
+     */
+    private function fetchHasOne(BaseRepository $repository, $key)
+    {
+        $key = $this->createRelationKey($this->repository->getTable());
+        return $repository->find()
+            ->where($key, $this->id)
+            ->first();
     }
 
     /**
