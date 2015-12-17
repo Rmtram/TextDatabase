@@ -8,6 +8,7 @@ use Braincrafted\ArrayQuery\Operator\LikeOperator;
 use Braincrafted\ArrayQuery\Operator\NotEqualOperator;
 use Braincrafted\ArrayQuery\SelectEvaluation;
 use Braincrafted\ArrayQuery\WhereEvaluation;
+use Respect\Validation\Rules\Not;
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
@@ -28,6 +29,16 @@ class Selector
     private $data;
 
     /**
+     * @var WhereEvaluation
+     */
+    private static $whereEvaluation;
+
+    /**
+     * @var SelectEvaluation
+     */
+    private static $selectEvaluation;
+
+    /**
      * constructor.
      * @param $entityClass
      * @param array $data
@@ -35,16 +46,19 @@ class Selector
     public function __construct($entityClass, array &$data)
     {
         $this->data = $data;
-        $we = new WhereEvaluation();
-        $we->addOperator(new EqualOperator());
-        $we->addOperator(new GreaterOperator());
-        $we->addOperator(new LikeOperator());
-        $we->addOperator(new NotEqualOperator());
+        if (empty(static::$whereEvaluation)) {
+            static::$whereEvaluation = new WhereEvaluation();
+            static::$whereEvaluation
+                ->addOperator(new EqualOperator)
+                ->addOperator(new GreaterOperator)
+                ->addOperator(new LikeOperator)
+                ->addOperator(new NotEqualOperator);
+        }
+        if (empty(static::$selectEvaluation)) {
+            static::$selectEvaluation = new SelectEvaluation();
+        }
         $this->query = new Query(
-            $entityClass,
-            new SelectEvaluation(),
-            $we
-        );
+            $entityClass, static::$selectEvaluation, static::$whereEvaluation);
     }
 
     /**

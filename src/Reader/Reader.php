@@ -37,6 +37,24 @@ class Reader
     }
 
     /**
+     * @param $table
+     * @return bool
+     */
+    public function existsStorage($table)
+    {
+        return is_readable($this->getStoragePath($table));
+    }
+
+    /**
+     * @param $table
+     * @return bool
+     */
+    public function existsSchema($table)
+    {
+        return is_readable($this->getSchemaPath($table));
+    }
+
+    /**
      * @param bool $bool
      * @return $this
      */

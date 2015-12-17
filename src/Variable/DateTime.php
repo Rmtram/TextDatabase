@@ -8,10 +8,12 @@ use Rmtram\TextDatabase\Repository\BaseRepository;
 class DateTime extends Variable
 {
 
+    const FORMAT = 'Y-m-d H:i:s';
+
     /**
      * @var array
      */
-    private $format = ['y-m-d', 'y-m-d h:i:s'];
+    private $format = ['Y-m-d', 'Y-m-d h:i:s'];
 
     /**
      * @param string|\DateTime $value
@@ -20,7 +22,7 @@ class DateTime extends Variable
     protected function prohibit($value)
     {
         if ($value instanceof \DateTime) {
-            $value = $value->format('Y-m-d H:i:s');
+            $value = $value->format(self::FORMAT);
         }
         else {
             if (!is_string($value)) {

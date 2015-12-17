@@ -3,6 +3,7 @@
 namespace Rmtram\TextDatabase\Writer;
 
 use Cake\Filesystem\File;
+use Rmtram\TextDatabase\Exceptions\ExistsFileException;
 
 abstract class AbstractWriter
 {
@@ -28,7 +29,7 @@ abstract class AbstractWriter
     {
         $path = $this->getPath();
         if (true === $this->writable() && false === $overwrite) {
-            throw new \RuntimeException('exists ' . $path);
+            throw new ExistsFileException('exists ' . $path);
         }
         $file = new File($path);
         if (!$file->write($this->export())) {

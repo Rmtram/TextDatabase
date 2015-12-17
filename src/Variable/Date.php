@@ -7,11 +7,13 @@ use Rmtram\TextDatabase\Repository\BaseRepository;
 
 class Date extends Variable
 {
+    const FORMAT = 'Y-m-d';
+
     /**
      * Date format.
      * @var string
      */
-    private $format = 'Y-m-d';
+    private $format = self::FORMAT;
 
     /**
      * @param string|\DateTime $value
@@ -20,7 +22,7 @@ class Date extends Variable
     protected function prohibit($value)
     {
         if ($value instanceof \DateTime) {
-            $value = $value->format('Y-m-d');
+            $value = $value->format(self::FORMAT);
         }
         else {
             if (!is_string($value) ||

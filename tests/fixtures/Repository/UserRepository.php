@@ -16,7 +16,7 @@ class UserRepository extends BaseRepository
     /**
      * @var string
      */
-    protected $entityClass = User::class;
+    protected $entity = User::class;
 
     /**
      * @var array
