@@ -8,6 +8,8 @@ use Braincrafted\ArrayQuery\Operator\LikeOperator;
 use Braincrafted\ArrayQuery\Operator\NotEqualOperator;
 use Braincrafted\ArrayQuery\SelectEvaluation;
 use Braincrafted\ArrayQuery\WhereEvaluation;
+use Rmtram\TextDatabase\Entity\BaseEntity;
+use Rmtram\TextDatabase\Writer\StorageWriter;
 
 /**
  * Class SelectQuery
@@ -56,26 +58,48 @@ class Selector
     }
 
     /**
+     * @param array $order
+     * @return $this
+     */
+    public function order(array $order) {
+        $this->query->order($order);
+        return $this;
+    }
+
+    /**
      * @param mixed $key
      * @param string $operator
      * @param string $value
-     * @param array $filters
      * @return $this
      */
-    public function where($key, $value, $operator = '=', array $filters = array())
+    public function where($key, $value, $operator = '=')
     {
-        $this->query->where($key, $value, $operator, $filters);
+        $this->query->where($key, $value, $operator, []);
         return $this;
+    }
+
+    /**
+     * @return array|bool
+     */
+    protected function delete()
+    {
+        $items = $this->query
+            ->from($this->data)
+            ->delete();
+        if (false === $items) {
+            return false;
+        }
+        return $items;
     }
 
     /**
      * @return bool|int
      */
-    public function indexNumber()
+    public function index()
     {
         return $this->query
             ->from($this->data)
-            ->getIndexNumber();
+            ->getIndex();
     }
 
     /**
@@ -87,23 +111,31 @@ class Selector
     }
 
     /**
-     * @return array[\Rmtram\TextDatabase\Entity\BaseEntity]
+     * @return array[BaseEntity]|null
      */
     public function all()
     {
-        return $this->query
-            ->from($this->data)
-            ->get();
+        return $this->fetch(false);
     }
 
     /**
-     * @return \Rmtram\TextDatabase\Entity\BaseEntity
+     * @return BaseEntity|null
      */
     public function first()
     {
-        return $this->query
+        return $this->fetch(true);
+    }
+
+    /**
+     * @param bool $first
+     * @return array|BaseEntity|null
+     */
+    private function fetch($first)
+    {
+        $ret = $this->query
             ->from($this->data)
-            ->get(true);
+            ->get($first);
+        return !empty($ret) ? $ret : null;
     }
 
 }

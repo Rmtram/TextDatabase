@@ -21,11 +21,6 @@ class BaseEntity implements \IteratorAggregate
     public function __construct()
     {
         $this->loadOfRepository();
-        $this->association = [
-            'belongsTo' => $this->repository->getBelongsTo(),
-            'hasOne'    => $this->repository->getHasOne(),
-            'hasMany'   => $this->repository->getHasMany()
-        ];
     }
 
     /**
@@ -57,7 +52,12 @@ class BaseEntity implements \IteratorAggregate
      */
     public function __get($key)
     {
-        foreach ($this->association as $associationName => $association) {
+        $associations = [
+            'belongsTo' => $this->repository->getBelongsTo(),
+            'hasOne'    => $this->repository->getHasOne(),
+            'hasMany'   => $this->repository->getHasMany()
+        ];
+        foreach ($associations as $associationName => $association) {
             if (array_key_exists($key, $association)) {
                 $entityClass = $association[$key];
                 $entity = new $entityClass();

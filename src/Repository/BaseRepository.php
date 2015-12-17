@@ -2,6 +2,8 @@
 
 namespace Rmtram\TextDatabase\Repository;
 
+use Braincrafted\ArrayQuery\SelectEvaluation;
+use Respect\Validation\Rules\Writable;
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\Exceptions\NotVariableClassException;
 use Rmtram\TextDatabase\Reader\Reader;
@@ -11,6 +13,7 @@ use Rmtram\TextDatabase\Repository\Traits\AssertTrait;
 use Rmtram\TextDatabase\Repository\Traits\AssociationTrait;
 use Rmtram\TextDatabase\Repository\Traits\ValidateTrait;
 use Rmtram\TextDatabase\Variable\Variable;
+use Rmtram\TextDatabase\Writer\StorageWriter;
 
 /**
  * Class BaseRepository
@@ -85,6 +88,38 @@ abstract class BaseRepository
         $this->assertEntity($entity, $this->entityClass);
         return (new Save($this, $this->data))
             ->save($entity);
+    }
+
+    /**
+     * @param BaseEntity|array|null $target
+     * @return bool
+     */
+    public function delete($target = null)
+    {
+        $selector = new Selector($this->entityClass, $this->data);
+        if ($target instanceof BaseEntity) {
+            foreach ($target as $key => $value) {
+                $selector->where($key, $value);
+            }
+        }
+        else if (is_array($target) && !empty($target)) {
+            foreach ($target as $key => $value) {
+                if (!array_key_exists($key, $this->fields)) {
+                    throw new \InvalidArgumentException(
+                        $key . ' is not not assignment');
+                }
+                $selector->where($key, $value);
+            }
+        }
+        $ref = new \ReflectionMethod($selector, 'delete');
+        $ref->setAccessible(true);
+        $data = $ref->invoke($selector);
+        if (false === $data) {
+            return false;
+        }
+        $this->data = $data;
+        $writer = new StorageWriter($this->table, $this->data);
+        return $writer->write(true);
     }
 
     /**
