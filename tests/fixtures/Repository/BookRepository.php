@@ -16,7 +16,7 @@ class BookRepository extends BaseRepository
     /**
      * @var string
      */
-    protected $entityClass = Book::class;
+    protected $entity = Book::class;
 
     /**
      * @var array

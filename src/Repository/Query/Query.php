@@ -120,18 +120,28 @@ class Query extends ArrayQuery
     public function get($first = false)
     {
         $items = [];
+        $sortFlag = !empty($this->order);
+
         foreach ($this->from as $item) {
             if (true === $this->evaluateWhere($item)) {
-                if (true === $first && empty($this->order)) {
+                if (true === $first && false === $sortFlag) {
                     return $this->createEntity($item);
                 }
-                $items[] = $item;
+                if (false === $sortFlag) {
+                    $items[] = $this->createEntity($item);
+                }
+                else {
+                    $items[] = $item;
+                }
             }
         }
-        $entities = [];
-        if (!empty($this->order)) {
-            $this->sort($items);
+
+        if (false === $sortFlag) {
+            return $items;
         }
+
+        $entities = [];
+        $this->sort($items);
         foreach ($items as $item) {
             $entity = $this->createEntity($item);
             if (true === $first) {
@@ -139,6 +149,7 @@ class Query extends ArrayQuery
             }
             $entities[] = $entity;
         }
+
         return $entities;
     }
 

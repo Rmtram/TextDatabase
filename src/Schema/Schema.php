@@ -11,11 +11,11 @@ use Rmtram\TextDatabase\Variable\Variable;
 /**
  * Class Schema
  * @package Rmtram\TextDatabase\Schema
- * @method Integer integer(String $name)
- * @method String string(String $name)
- * @method Date date(String $name)
- * @method DateTime dateTime(String $name)
- * @method Text text(String $name)
+ * @method \Rmtram\TextDatabase\Variable\Integer integer(String $name)
+ * @method \Rmtram\TextDatabase\Variable\String string(String $name)
+ * @method \Rmtram\TextDatabase\Variable\Date date(String $name)
+ * @method \Rmtram\TextDatabase\Variable\DateTime dateTime(String $name)
+ * @method \Rmtram\TextDatabase\Variable\Text text(String $name)
  */
 class Schema
 {

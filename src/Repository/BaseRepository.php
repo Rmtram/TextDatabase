@@ -2,8 +2,6 @@
 
 namespace Rmtram\TextDatabase\Repository;
 
-use Braincrafted\ArrayQuery\SelectEvaluation;
-use Respect\Validation\Rules\Writable;
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\Exceptions\NotVariableClassException;
 use Rmtram\TextDatabase\Reader\Reader;
@@ -37,7 +35,7 @@ abstract class BaseRepository
     /**
      * @var string
      */
-    protected $entityClass;
+    protected $entity;
 
     /**
      * @var array
@@ -50,7 +48,7 @@ abstract class BaseRepository
     public function __construct()
     {
         $this->assertTable($this->table);
-        $this->assertEntity($this->entityClass);
+        $this->assertEntity($this->entity);
         $this->loadOfSchema();
         $this->loadOfStorage();
     }
@@ -61,6 +59,18 @@ abstract class BaseRepository
     public function getFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @param string $field
+     * @return Variable|null
+     */
+    public function getVariableByField($field)
+    {
+        if (isset($this->fields[$field])) {
+            return $this->fields[$field];
+        }
+        return null;
     }
 
     /**
@@ -76,7 +86,7 @@ abstract class BaseRepository
      */
     public function find()
     {
-        return new Selector($this->entityClass, $this->data);
+        return new Selector($this->entity, $this->data);
     }
 
     /**
@@ -85,7 +95,7 @@ abstract class BaseRepository
      */
     public function save(BaseEntity $entity)
     {
-        $this->assertEntity($entity, $this->entityClass);
+        $this->assertEntity($entity, $this->entity);
         return (new Save($this, $this->data))
             ->save($entity);
     }
@@ -96,7 +106,7 @@ abstract class BaseRepository
      */
     public function delete($target = null)
     {
-        $selector = new Selector($this->entityClass, $this->data);
+        $selector = new Selector($this->entity, $this->data);
         if ($target instanceof BaseEntity) {
             foreach ($target as $key => $value) {
                 $selector->where($key, $value);

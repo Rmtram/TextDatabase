@@ -5,6 +5,8 @@ namespace Rmtram\TextDatabase\Entity;
 use Doctrine\Common\Inflector\Inflector;
 use Rmtram\TextDatabase\Exceptions\NotRepositoryClassException;
 use Rmtram\TextDatabase\Repository\BaseRepository;
+use Rmtram\TextDatabase\Variable\Date;
+use Rmtram\TextDatabase\Variable\DateTime;
 use Traversable;
 
 class BaseEntity implements \IteratorAggregate
@@ -52,11 +54,7 @@ class BaseEntity implements \IteratorAggregate
      */
     public function __get($key)
     {
-        $associations = [
-            'belongsTo' => $this->repository->getBelongsTo(),
-            'hasOne'    => $this->repository->getHasOne(),
-            'hasMany'   => $this->repository->getHasMany()
-        ];
+        $associations = $this->getAssociations();
         foreach ($associations as $associationName => $association) {
             if (array_key_exists($key, $association)) {
                 $entityClass = $association[$key];
@@ -71,6 +69,18 @@ class BaseEntity implements \IteratorAggregate
             }
         }
         return null;
+    }
+
+    /**
+     * @return array
+     */
+    private function getAssociations()
+    {
+        return [
+            'belongsTo' => $this->repository->getBelongsTo(),
+            'hasOne'    => $this->repository->getHasOne(),
+            'hasMany'   => $this->repository->getHasMany()
+        ];
     }
 
     /**
@@ -137,6 +147,19 @@ class BaseEntity implements \IteratorAggregate
     {
         $ret = [];
         foreach ($this as $fieldName => $val) {
+            if ($val instanceof \DateTime) {
+                $variable = $this->repository->getVariableByField($fieldName);
+                if ($variable instanceof Date) {
+                    $val = $val->format(Date::FORMAT);
+                }
+                else if ($variable instanceof DateTime) {
+                    $val = $val->format(DateTime::FORMAT);
+                }
+                else {
+                    throw new \UnexpectedValueException(
+                        'bad!! variable type in ' . $fieldName);
+                }
+            }
             $ret[$fieldName] = $val;
         }
         return $ret;
@@ -159,16 +182,9 @@ class BaseEntity implements \IteratorAggregate
      */
     private function loadOfRepository()
     {
-        if (empty($this->repository)) {
-            throw new \RuntimeException('undefined repository.');
-        }
-
         if (!is_a($this->repository, BaseRepository::class, true)) {
             throw new NotRepositoryClassException($this->repository);
         }
-
-        if (is_string($this->repository)) {
-            $this->repository = new $this->repository();
-        }
+        $this->repository = new $this->repository;
     }
 }
