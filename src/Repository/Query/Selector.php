@@ -70,12 +70,11 @@ class Selector
      * @param mixed $key
      * @param string $value
      * @param string $operator
-     * @param array $filters
      * @return $this
      */
-    public function where($key, $value, $operator = '=', $filters = array())
+    public function where($key, $value, $operator = '=')
     {
-        $this->query->where($key, $value, $operator, $filters);
+        $this->query->where($key, $value, $operator);
         return $this;
     }
 

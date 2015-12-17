@@ -52,9 +52,11 @@ class Query extends ArrayQuery
      * @param array|bool $filters
      * @return $this
      */
-    public function select(array $select, $filters = false)
+    public function select($select, $filters = array())
     {
-        $this->select = $select;
+        if (is_array($select) && !empty($select)) {
+            $this->select = $select;
+        }
         return $this;
     }
 
