@@ -18,14 +18,13 @@ class SaveTest extends \PHPUnit_Framework_TestCase
     public function testCreateOfObject()
     {
         $user = new User();
-        $user->id = 1;
         $user->name = 'user1';
         $userRepository = new UserRepository();
         $userRepository->save($user);
-        $actual = $userRepository->find()->where('id', 1)->first();
+        $expand = $userRepository->find()->where('id', 1)->first();
 
-        $this->assertEquals($user->id,   $actual->id);
-        $this->assertEquals($user->name, $actual->name);
+        $this->assertEquals($expand->id, 1);
+        $this->assertEquals($expand->name, 'user1');
     }
 
     public function testCreateOfArray()
@@ -86,13 +85,20 @@ class SaveTest extends \PHPUnit_Framework_TestCase
         foreach ($range as $index) {
             $user = new User();
             $user->setArray([
-                'id'   => $index,
                 'name' => 'user' . $index
             ]);
             $userRepository->save($user);
         }
-        $count = $userRepository->find()->count();
-        $this->assertEquals($count, 100);
+        $users = $userRepository
+            ->find()
+            ->order(['id' => 'asc'])
+            ->all();
+        $cnt = 1;
+        foreach ($users as $user) {
+            $this->assertEquals($user->id, $cnt);
+            $this->assertEquals($user->name, 'user' . $cnt);
+            $cnt++;
+        }
     }
 
     public function testUpdate()

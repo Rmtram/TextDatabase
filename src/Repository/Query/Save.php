@@ -71,7 +71,7 @@ class Save
             return true;
         }
         if (false === $this->rollback($operator)) {
-            throw new \RuntimeException('save failed');
+            throw new \RuntimeException('fail rollback.');
         }
         return false;
     }
@@ -101,20 +101,37 @@ class Save
      */
     private function substitution(BaseEntity $entity)
     {
-        $this->repository->getFields();
-        $uniqueFields = $this->generatorUniqueFields();
-        foreach ($uniqueFields as $fieldName) {
-            $index = $this->repository->find()
-                ->where($fieldName, $entity->$fieldName)
-                ->indexNumber();
-            if (false !== $index && isset($this->data[$index])) {
-                $this->lastIndex  = $index;
-                $this->lastEntity = $this->data[$index];
-                $this->data[$index] = $entity();
-                return static::OPERATOR_UPDATE;
+        $fields = $this->repository->getFields();
+        $row = $entity();
+        foreach ($fields as $field) {
+            $property = $field();
+            $name = $property['name'];
+            if ($this->isUnique($property)) {
+                if (!empty($entity->$name)) {
+                    $index = $this->repository->find()
+                        ->where($name, $entity->$name)
+                        ->index();
+                    if (false !== $index && isset($this->data[$index])) {
+                        $this->lastIndex  = $index;
+                        $this->lastEntity = $this->data[$index];
+                        $this->data[$index] = $row;
+                        return static::OPERATOR_UPDATE;
+                    }
+                }
+            }
+            if ($this->isAutoIncrement($property)) {
+                $last = $this->repository->find()
+                    ->order([$name => 'desc'])
+                    ->first();
+                if (empty($last)) {
+                    $row[$name] = 1;
+                }
+                else {
+                    $row[$name] = $last->$name + 1;
+                }
             }
         }
-        $this->data[] = $entity();
+        $this->data[] = $row;
         end($this->data);
         $this->lastIndex = key($this->data);
         return static::OPERATOR_ADD;
@@ -132,26 +149,27 @@ class Save
     }
 
     /**
-     * @return \Generator
+     * @param array $property
+     * @return bool
      */
-    private function generatorUniqueFields()
+    private function isAutoIncrement(array $property)
     {
-        $fields = $this->repository->getFields();
-        foreach ($fields as $field) {
-            $_field = $field();
-            if ($this->isUnique($_field)) {
-                yield $_field['name'];
-            }
+        if (!isset($property['attributes']['autoIncrement'])) {
+            return false;
         }
+        if (true === $property['attributes']['autoIncrement']) {
+            return true;
+        }
+        return false;
     }
 
     /**
-     * @param array $field
+     * @param array $property
      * @return bool
      */
-    private function isUnique(array $field)
+    private function isUnique(array $property)
     {
-        $attr = $field['attributes'];
+        $attr = $property['attributes'];
         foreach ($this->unique as $key) {
             if (isset($attr[$key]) && true === $attr[$key]) {
                 return true;

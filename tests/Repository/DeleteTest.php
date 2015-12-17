@@ -6,7 +6,7 @@ use Rmtram\TextDatabase\Connection;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Repository\UserRepository;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
-class ReadTest extends \PHPUnit_Framework_TestCase
+class DeleteTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
@@ -18,61 +18,49 @@ class ReadTest extends \PHPUnit_Framework_TestCase
         $this->addFixtures();
     }
 
-    public function testGetUsers()
+    public function testDeleteUserById1()
     {
         $repository = new UserRepository();
+        $repository->delete(['id' => 1]);
+        $user = $repository->find()
+            ->where('id', 1)
+            ->first();
+        $this->assertNull($user);
+    }
+
+    public function testDeleteUserByEntity()
+    {
+        $repository = new UserRepository();
+        $user = $repository->find()->where('id', 1)->first();
+        $this->assertNotNull($user);
+        $repository->delete($user);
+        $user = $repository->find()->where('id', 1)->first();
+        $this->assertNull($user);
+    }
+
+    public function testDeleteUsers()
+    {
+        $repository = new UserRepository();
+        $repository->delete();
         $users = $repository->find()->all();
-        $this->assertEquals($users[0]->id, 1);
-        $this->assertEquals($users[0]->name, 'user1');
+        $this->assertNull($users);
     }
 
-    public function testGetUser()
+    public function testDeleteUserByName1()
     {
         $repository = new UserRepository();
-        $user = $repository->find()->first();
-        $this->assertEquals($user->id, 1);
-        $this->assertEquals($user->name, 'user1');
+        $repository->delete(['name' => 'user1']);
+        $user = $repository->find()->where('name', 'user1')->first();
+        $this->assertNull($user);
     }
 
-    public function testGetUserById1()
+    public function testNotDeleteUserByName()
     {
         $repository = new UserRepository();
-        $user = $repository->find()->where('id', 1)->first();
-        $this->assertEquals($user->id, 1);
-        $this->assertEquals($user->name, 'user1');
+        $repository->delete(['name' => 'user']);
+        $user = $repository->find()->where('name', 'user1')->first();
+        $this->assertNotNull($user);
     }
-
-    public function testGetUserWithBookById1()
-    {
-        $repository = new UserRepository();
-        $user = $repository->find()->where('id', 1)->first();
-        $books = $user->books;
-        $this->assertEquals($books[0]->id, 1);
-        $this->assertEquals($books[1]->id, 2);
-        $this->assertEquals($books[0]->title, 'title1');
-        $this->assertEquals($books[1]->title, 'title2');
-        $this->assertEquals($books[0]->description, 'description1');
-        $this->assertEquals($books[1]->description, 'description2');
-        $this->assertEquals($books[0]->user_id, 1);
-        $this->assertEquals($books[1]->user_id, 1);
-    }
-
-    public function testOrderAsc()
-    {
-        $repository = new UserRepository();
-        $user = $repository->find()->order(['id' => 'asc'])->first();
-        $this->assertEquals($user->id, 1);
-        $this->assertEquals($user->name, 'user1');
-    }
-
-    public function testOrderDesc()
-    {
-        $repository = new UserRepository();
-        $user = $repository->find()->order(['id' => 'desc'])->first();
-        $this->assertEquals($user->id, 2);
-        $this->assertEquals($user->name, 'user2');
-    }
-
 
     public function tearDown()
     {

@@ -17,14 +17,12 @@ require __DIR__ . '/vendor/autoload.php';
 Rmtram\TextDatabase\Connection::setPath('path/to/');
 
 Builder::make()
-    ->setOverwrite(true)
     ->table('users', function(Schema $schema) {
     $schema->integer('id')->autoIncrement()->primary();
     $schema->string('name')->notNull();
 });
 
 Builder::make()
-    ->setOverwrite(true)
     ->table('books', function(Schema $schema) {
     $schema->integer('id')->autoIncrement()->primary();
     $schema->string('isbn')->unique()->notNull();
@@ -34,7 +32,6 @@ Builder::make()
 });
 
 Builder::make()
-    ->setOverwrite(true)
     ->table('book_comments', function(Schema $schema) {
     $schema->integer('id')->autoIncrement()->primary();
     $schema->text('body')->notNull();
@@ -86,7 +83,6 @@ class User extends Rmtram\TextDatabase\Entity\BaseEntity
 {
     public $id;
     public $title;
-    
     protected $repository = UserRepository::class;
 }
 
@@ -96,7 +92,6 @@ class Book extends Rmtram\TextDatabase\Entity\BaseEntity {
     public $title;
     public $description;
     public $user_id;
-    
     protected $repository = BookRepository::class;
 }
 
@@ -126,7 +121,15 @@ $users = $userRepository->find()->all();
 foreach ($users as $user) {
     echo $user->name;
 }
-// Read association
+
+// Read sort
+$userRepository = new UserRepository();
+$user = $userRepository->find()
+    ->order(['name' => 'asc'])
+    ->all();
+
+// Read relation
+$userRepository = new UserRepository();
 $user = $userRepository->find()->first();
 foreach ($user->books as $book) {
     echo $book->title;
@@ -135,4 +138,20 @@ foreach ($user->books as $book) {
         echo $comment->user->name;
     }
 }
+
+// Delete
+
+// all
+$userRepository = new UserRepository();
+$userRepository->delete();
+
+// where
+$userRepository = new UserRepository();
+$userRepository->delete(['id' => 1])
+
+// entity
+$userRepository = new UserRepository();
+$user = $userRepository->find()->first();
+$userRepository->delete($user);
+
 ```
