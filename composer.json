@@ -1,6 +1,27 @@
 {
+  "name": "rmtram/text-database",
+  "type": "library",
+  "description": "Text-file based database.",
+  "keywords": [
+    "Text",
+    "TextORM",
+    "TextDatabase",
+    "Database",
+    "ORM"
+  ],
+  "homepage": "http://rmtram.github.io/TextDatabase",
+  "support": {
+    "issues": "https://github.com/Rmtram/TextDatabase/issues",
+    "source": "https://github.com/Rmtram/TextDatabase"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Rmtram",
+      "email": "rmtram95@gmail.com"
+    }
+  ],
   "require": {
-    "nesbot/carbon": "~1.21",
     "respect/validation": "~1.0",
     "braincrafted/arrayquery": "dev-master",
     "cakephp/filesystem": "~3.1",
