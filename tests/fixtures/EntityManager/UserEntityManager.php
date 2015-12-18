@@ -1,12 +1,12 @@
 <?php
 
-namespace Rmtram\TextDatabase\UnitTest\Fixtures\Repository;
+namespace Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager;
 
-use Rmtram\TextDatabase\Repository\BaseRepository;
+use Rmtram\TextDatabase\EntityManager\BaseEntityManager;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\Book;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\User;
 
-class UserRepository extends BaseRepository
+class UserEntityManager extends BaseEntityManager
 {
     /**
      * @var string

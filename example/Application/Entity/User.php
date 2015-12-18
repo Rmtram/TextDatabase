@@ -3,7 +3,7 @@
 namespace Rmtram\TextDatabase\Example\Entity;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\Example\Repository\UserRepository;
+use Rmtram\TextDatabase\Example\EntityManager\UserEntityManager;
 
 class User extends BaseEntity
 {
@@ -30,5 +30,5 @@ class User extends BaseEntity
     /**
      * @var string
      */
-    protected $repository = UserRepository::class;
+    protected static $entityManager = UserEntityManager::class;
 }

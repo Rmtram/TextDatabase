@@ -3,7 +3,9 @@
 namespace Rmtram\TextDatabase\UnitTest\Repository;
 
 use Rmtram\TextDatabase\Connection;
+use Rmtram\TextDatabase\EntityManager\ShareStorage;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\User;
+use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\UserEntityManager;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Repository\UserRepository;
 
 class SaveTest extends \PHPUnit_Framework_TestCase
@@ -11,17 +13,22 @@ class SaveTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         require_once __DIR__ . '/../fixtures/Entity/User.php';
-        require_once __DIR__ . '/../fixtures/Repository/UserRepository.php';
+        require_once __DIR__ . '/../fixtures/EntityManager/UserEntityManager.php';
         Connection::setPath(__DIR__ . '/../fixtures/storage/');
+        foreach (['users', 'books'] as $table) {
+            $share = ShareStorage::make($table);
+            $ref = new \ReflectionMethod($share, 'reset');
+            $ref->setAccessible(true);
+            $ref->invoke($share);
+        }
     }
 
     public function testCreateOfObject()
     {
         $user = new User();
         $user->name = 'user1';
-        $userRepository = new UserRepository();
-        $userRepository->save($user);
-        $expand = $userRepository->find()->where('id', 1)->first();
+        UserEntityManager::save($user);
+        $expand = UserEntityManager::find()->where('id', 1)->first();
 
         $this->assertEquals($expand->id, 1);
         $this->assertEquals($expand->name, 'user1');
@@ -34,9 +41,8 @@ class SaveTest extends \PHPUnit_Framework_TestCase
             'id'   => 1,
             'name' => 'user1'
         ]);
-        $userRepository = new UserRepository();
-        $userRepository->save($user);
-        $actual = $userRepository->find()->where('id', 1)->first();
+        UserEntityManager::save($user);
+        $actual = UserEntityManager::find()->where('id', 1)->first();
         $this->assertEquals($user->id,   $actual->id);
         $this->assertEquals($user->name, $actual->name);
     }
@@ -47,9 +53,8 @@ class SaveTest extends \PHPUnit_Framework_TestCase
         $user->id = 1;
         $user->name = 'user1';
         $user->ng = 'ng';
-        $userRepository = new UserRepository();
-        $userRepository->save($user);
-        $user = $userRepository->find()->where('id', 1)->first();
+        UserEntityManager::save($user);
+        $user = UserEntityManager::find()->where('id', 1)->first();
         $this->assertEmpty($user->ng);
     }
 
@@ -61,9 +66,8 @@ class SaveTest extends \PHPUnit_Framework_TestCase
             'name' => 'user1',
             'ng'   => 'ng'
         ]);
-        $userRepository = new UserRepository();
-        $userRepository->save($user);
-        $user = $userRepository->find()->where('id', 1)->first();
+        UserEntityManager::save($user);
+        $user = UserEntityManager::find()->where('id', 1)->first();
         $this->assertEmpty($user->ng);
     }
 
@@ -74,25 +78,23 @@ class SaveTest extends \PHPUnit_Framework_TestCase
             'id'   => null,
             'name' => null
         ]);
-        $userRepository = new UserRepository();
-        $this->assertFalse($userRepository->save($user));
+        $this->assertFalse(UserEntityManager::save($user));
     }
 
     public function testCreate100Times()
     {
         $range = range(1, 100);
-        $userRepository = new UserRepository();
         foreach ($range as $index) {
             $user = new User();
             $user->setArray([
                 'name' => 'user' . $index
             ]);
-            $userRepository->save($user);
+            UserEntityManager::save($user);
         }
-        $users = $userRepository
-            ->find()
+        $users = UserEntityManager::find()
             ->order(['id' => 'asc'])
             ->all();
+
         $cnt = 1;
         foreach ($users as $user) {
             $this->assertEquals($user->id, $cnt);
@@ -105,17 +107,17 @@ class SaveTest extends \PHPUnit_Framework_TestCase
     {
         $user = new User();
         $user->setArray([
-            'id'   => 1,
             'name' => 'user1'
         ]);
-        $userRepository = new UserRepository();
-        $userRepository->save($user);
+        UserEntityManager::save($user);
 
-        $user = $userRepository->find()->where('id', 1)->first();
-        $user->name = 'person1';
-        $userRepository->save($user);
         /** @var User $user */
-        $user = $userRepository->find()->where('id', 1)->first();
+        $user = UserEntityManager::find()->where('id', 1)->first();
+        $user->name = 'person1';
+        UserEntityManager::save($user);
+
+        /** @var User $user */
+        $user = UserEntityManager::find()->where('id', 1)->first();
         $this->assertEquals($user->id, 1);
         $this->assertEquals($user->name, 'person1');
     }

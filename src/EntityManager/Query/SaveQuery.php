@@ -1,16 +1,17 @@
 <?php
 
-namespace Rmtram\TextDatabase\Repository\Query;
+namespace Rmtram\TextDatabase\EntityManager\Query;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\Repository\BaseRepository;
-use Rmtram\TextDatabase\Repository\Traits\ValidateTrait;
+use Rmtram\TextDatabase\EntityManager\BaseEntityManager;
+use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\EntityManager\Traits\AssertTrait;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
-class Save
+class SaveQuery
 {
 
-    use ValidateTrait;
+    use AssertTrait;
 
     /**
      * save update operator
@@ -23,10 +24,9 @@ class Save
     const OPERATOR_UPDATE = 2;
 
     /**
-     * @var BaseRepository
+     * @var string
      */
-    private $repository;
-
+    private $entityManager;
     /**
      * @var array
      */
@@ -45,35 +45,58 @@ class Save
     /**
      * @var array
      */
-    private $data;
+    private $items;
 
     /**
-     * @param BaseRepository $repository
-     * @param array $data
+     * constructor.
+     * @param string $entityManager
+     * @param ShareStorage $storage
      */
-    public function __construct(BaseRepository $repository, array &$data)
+    public function __construct($entityManager, ShareStorage $storage)
     {
-        $this->repository = $repository;
-        $this->data = &$data;
+        $this->assertEntityManager($entityManager);
+        $this->entityManager = $entityManager;
+        $this->storage = $storage;
+        $this->items = $storage->get();
     }
 
     /**
      * @param BaseEntity $entity
      * @return mixed
      */
-    public function save(BaseEntity $entity)
+    public function execute(BaseEntity $entity)
     {
         if (false === $this->validate($entity)) {
             return false;
         }
         $operator = $this->substitution($entity);
         if ($this->write()) {
+            $this->storage->set($this->items);
             return true;
         }
         if (false === $this->rollback($operator)) {
             throw new \RuntimeException('fail rollback.');
         }
         return false;
+    }
+
+    /**
+     * @param BaseEntity $entity
+     * @return bool
+     */
+    public function validate(BaseEntity $entity)
+    {
+        /** @var BaseEntityManager $entityManager */
+        $entityManager = $this->entityManager;
+        $fields = $entityManager::getFields();
+        foreach ($fields as $fieldName => $variable) {
+            $v = new \ReflectionMethod($variable, 'prohibit');
+            $v->setAccessible(true);
+            if ($v->invoke($variable, $entity->{$fieldName})) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -84,11 +107,11 @@ class Save
     {
         if (!is_null($this->lastIndex)) {
             if ($operator === static::OPERATOR_ADD) {
-                unset($this->data[$this->lastIndex]);
+                unset($this->items[$this->lastIndex]);
                 return true;
             }
             else if ($operator === static::OPERATOR_UPDATE) {
-                $this->data[$this->lastIndex] = $this->lastEntity;
+                $this->items[$this->lastIndex] = $this->lastEntity;
                 return true;
             }
         }
@@ -101,26 +124,18 @@ class Save
      */
     private function substitution(BaseEntity $entity)
     {
-        $fields = $this->repository->getFields();
+        /** @var BaseEntityManager $entityManager */
+        $entityManager = $this->entityManager;
+        $fields = $entityManager::getFields();
         $row = $entity();
         foreach ($fields as $field) {
             $property = $field();
             $name = $property['name'];
-            if ($this->isUnique($property)) {
-                if (!empty($entity->$name)) {
-                    $index = $this->repository->find()
-                        ->where($name, $entity->$name)
-                        ->index();
-                    if (false !== $index && isset($this->data[$index])) {
-                        $this->lastIndex  = $index;
-                        $this->lastEntity = $this->data[$index];
-                        $this->data[$index] = $row;
-                        return static::OPERATOR_UPDATE;
-                    }
-                }
+            if ($this->unique($property, $row, $name, $entity, $entityManager)) {
+                return static::OPERATOR_UPDATE;
             }
             if ($this->isAutoIncrement($property)) {
-                $last = $this->repository->find()
+                $last = $entityManager::find()
                     ->order([$name => 'desc'])
                     ->first();
                 if (empty($last)) {
@@ -131,10 +146,34 @@ class Save
                 }
             }
         }
-        $this->data[] = $row;
-        end($this->data);
-        $this->lastIndex = key($this->data);
+        $this->items[] = $row;
+        end($this->items);
+        $this->lastIndex = key($this->items);
         return static::OPERATOR_ADD;
+    }
+
+    /**
+     * @param $property
+     * @param $row
+     * @param $entity
+     * @param BaseEntityManager $entityManager
+     * @return bool
+     */
+    private function unique($property, $row, $name, $entity, $entityManager) {
+        if (!$this->isUnique($property) || empty($entity->$name)) {
+            return false;
+        }
+        $index = $entityManager::find()
+            ->where($name, $entity->$name)
+            ->uniqueIndex();
+
+        if (false !== $index && isset($this->items[$index])) {
+            $this->lastIndex  = $index;
+            $this->lastEntity = $this->items[$index];
+            $this->items[$index] = $row;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -142,9 +181,9 @@ class Save
      */
     private function write()
     {
-        $writer = new StorageWriter($this
-            ->repository
-            ->getTable(), $this->data);
+        /** @var BaseEntityManager $entityManager */
+        $entityManager = $this->entityManager;
+        $writer = new StorageWriter($entityManager::getTable(), $this->items);
         return $writer->write(true);
     }
 
