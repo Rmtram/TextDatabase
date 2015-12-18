@@ -3,7 +3,7 @@
 namespace Rmtram\TextDatabase\UnitTest\Fixtures\Entity;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\UnitTest\Fixtures\Repository\BookRepository;
+use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\BookEntityManager;
 
 class Book extends BaseEntity
 {
@@ -30,5 +30,5 @@ class Book extends BaseEntity
     /**
      * @var string
      */
-    protected $repository = BookRepository::class;
+    protected static $entityManager = BookEntityManager::class;
 }

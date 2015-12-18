@@ -3,8 +3,8 @@
 namespace Rmtram\TextDatabase\Entity;
 
 use Doctrine\Common\Inflector\Inflector;
-use Rmtram\TextDatabase\Exceptions\NotRepositoryClassException;
-use Rmtram\TextDatabase\Repository\BaseRepository;
+use Rmtram\TextDatabase\EntityManager\BaseEntityManager;
+use Rmtram\TextDatabase\EntityManager\Traits\AssertTrait;
 use Rmtram\TextDatabase\Variable\Date;
 use Rmtram\TextDatabase\Variable\DateTime;
 use Traversable;
@@ -12,17 +12,19 @@ use Traversable;
 class BaseEntity implements \IteratorAggregate
 {
 
+    use AssertTrait;
+
     /**
-     * @var BaseRepository
+     * @var string
      */
-    protected $repository;
+    protected static $entityManager;
 
     /**
      * constructor.
      */
     public function __construct()
     {
-        $this->loadOfRepository();
+        $this->assertEntityManager(static::$entityManager);
     }
 
     /**
@@ -59,13 +61,17 @@ class BaseEntity implements \IteratorAggregate
             if (array_key_exists($key, $association)) {
                 $entityClass = $association[$key];
                 $entity = new $entityClass();
-                $property = new \ReflectionProperty($entity, 'repository');
+
+                $property = new \ReflectionProperty($entity, 'entityManager');
                 $property->setAccessible(true);
-                /** @var BaseRepository $repository */
-                $repository = $property->getValue($entity);
+                $entityManager = $property->getValue($entity);
+
+                $this->assertEntityManager($entityManager);
                 unset($property, $entity);
+
                 $fetch = $this->getFetchMethodName($associationName);
-                return $this->$fetch($repository, $key);
+
+                return $this->$fetch($entityManager, $key);
             }
         }
         return null;
@@ -76,10 +82,12 @@ class BaseEntity implements \IteratorAggregate
      */
     private function getAssociations()
     {
+        /** @var BaseEntityManager $entityManager */
+        $entityManager = static::$entityManager;
         return [
-            'belongsTo' => $this->repository->getBelongsTo(),
-            'hasOne'    => $this->repository->getHasOne(),
-            'hasMany'   => $this->repository->getHasMany()
+            'belongsTo' => $entityManager::getBelongsTo(),
+            'hasOne'    => $entityManager::getHasOne(),
+            'hasMany'   => $entityManager::getHasMany()
         ];
     }
 
@@ -93,40 +101,44 @@ class BaseEntity implements \IteratorAggregate
     }
 
     /**
-     * @param BaseRepository $repository
+     * @param BaseEntityManager $entityManager
      * @param $key
      * @return BaseEntity
      */
-    private function fetchBelongsTo(BaseRepository $repository, $key)
+    private function fetchBelongsTo($entityManager, $key)
     {
         $key = $this->createRelationKey($key);
-        return $repository->find()
+        return $entityManager::find()
             ->where('id', $this->{$key})
             ->first();
     }
 
     /**
-     * @param BaseRepository $repository
+     * @param BaseEntityManager $entityManager
      * @param $key
      * @return BaseEntity
      */
-    private function fetchHasMany(BaseRepository $repository, $key)
+    private function fetchHasMany($entityManager, $key)
     {
-        $key = $this->createRelationKey($this->repository->getTable());
-        return $repository->find()
+        /** @var BaseEntityManager $selfEntityManager */
+        $selfEntityManager = static::$entityManager;
+        $key = $this->createRelationKey($selfEntityManager::getTable());
+        return $entityManager::find()
             ->where($key, $this->id)
             ->all();
     }
 
     /**
-     * @param BaseRepository $repository
+     * @param BaseEntityManager $entityManager
      * @param $key
      * @return BaseEntity
      */
-    private function fetchHasOne(BaseRepository $repository, $key)
+    private function fetchHasOne($entityManager, $key)
     {
-        $key = $this->createRelationKey($this->repository->getTable());
-        return $repository->find()
+        /** @var BaseEntityManager $selfEntityManager */
+        $selfEntityManager = static::$entityManager;
+        $key = $this->createRelationKey($selfEntityManager::getTable());
+        return $entityManager::find()
             ->where($key, $this->id)
             ->first();
     }
@@ -146,9 +158,11 @@ class BaseEntity implements \IteratorAggregate
     public function __invoke()
     {
         $ret = [];
+        /** @var BaseEntityManager $entityManager */
+        $entityManager = static::$entityManager;
         foreach ($this as $fieldName => $val) {
             if ($val instanceof \DateTime) {
-                $variable = $this->repository->getVariableByField($fieldName);
+                $variable = $entityManager::getField($fieldName);
                 if ($variable instanceof Date) {
                     $val = $val->format(Date::FORMAT);
                 }
@@ -177,14 +191,4 @@ class BaseEntity implements \IteratorAggregate
         return new \ArrayIterator($this);
     }
 
-    /**
-     * load repository.
-     */
-    private function loadOfRepository()
-    {
-        if (!is_a($this->repository, BaseRepository::class, true)) {
-            throw new NotRepositoryClassException($this->repository);
-        }
-        $this->repository = new $this->repository;
-    }
 }

@@ -3,7 +3,7 @@
 namespace Rmtram\TextDatabase\Example\Entity;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\Example\Repository\CommentRepository;
+use Rmtram\TextDatabase\Example\Repository\CommentEntityManager;
 
 class Comment extends BaseEntity
 {
@@ -35,5 +35,5 @@ class Comment extends BaseEntity
     /**
      * @var string
      */
-    protected $repository = CommentRepository::class;
+    protected static $entityManager = CommentEntityManager::class;
 }

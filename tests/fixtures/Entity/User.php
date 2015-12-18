@@ -3,7 +3,7 @@
 namespace Rmtram\TextDatabase\UnitTest\Fixtures\Entity;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\UnitTest\Fixtures\Repository\UserRepository;
+use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\UserEntityManager;
 
 class User extends BaseEntity
 {
@@ -20,5 +20,5 @@ class User extends BaseEntity
     /**
      * @var string
      */
-    protected $repository = UserRepository::class;
+    protected static $entityManager = UserEntityManager::class;
 }

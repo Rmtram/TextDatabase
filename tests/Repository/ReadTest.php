@@ -3,7 +3,8 @@
 namespace Rmtram\TextDatabase\UnitTest\Repository;
 
 use Rmtram\TextDatabase\Connection;
-use Rmtram\TextDatabase\UnitTest\Fixtures\Repository\UserRepository;
+use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\UserEntityManager;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
 class ReadTest extends \PHPUnit_Framework_TestCase
@@ -12,40 +13,36 @@ class ReadTest extends \PHPUnit_Framework_TestCase
     {
         require_once __DIR__ . '/../fixtures/Entity/User.php';
         require_once __DIR__ . '/../fixtures/Entity/Book.php';
-        require_once __DIR__ . '/../fixtures/Repository/UserRepository.php';
-        require_once __DIR__ . '/../fixtures/Repository/BookRepository.php';
+        require_once __DIR__ . '/../fixtures/EntityManager/UserEntityManager.php';
+        require_once __DIR__ . '/../fixtures/EntityManager/BookEntityManager.php';
         Connection::setPath(__DIR__ . '/../fixtures/storage/');
         $this->addFixtures();
     }
 
     public function testGetUsers()
     {
-        $repository = new UserRepository();
-        $users = $repository->find()->all();
+        $users = UserEntityManager::find()->all();
         $this->assertEquals($users[0]->id, 1);
         $this->assertEquals($users[0]->name, 'user1');
     }
 
     public function testGetUser()
     {
-        $repository = new UserRepository();
-        $user = $repository->find()->first();
+        $user = UserEntityManager::find()->first();
         $this->assertEquals($user->id, 1);
         $this->assertEquals($user->name, 'user1');
     }
 
     public function testGetUserById1()
     {
-        $repository = new UserRepository();
-        $user = $repository->find()->where('id', 1)->first();
+        $user = UserEntityManager::find()->where('id', 1)->first();
         $this->assertEquals($user->id, 1);
         $this->assertEquals($user->name, 'user1');
     }
 
     public function testGetUserWithBookById1()
     {
-        $repository = new UserRepository();
-        $user = $repository->find()->where('id', 1)->first();
+        $user = UserEntityManager::find()->where('id', 1)->first();
         $books = $user->books;
         $this->assertEquals($books[0]->id, 1);
         $this->assertEquals($books[1]->id, 2);
@@ -59,16 +56,14 @@ class ReadTest extends \PHPUnit_Framework_TestCase
 
     public function testOrderAsc()
     {
-        $repository = new UserRepository();
-        $user = $repository->find()->order(['id' => 'asc'])->first();
+        $user = UserEntityManager::find()->order(['id' => 'asc'])->first();
         $this->assertEquals($user->id, 1);
         $this->assertEquals($user->name, 'user1');
     }
 
     public function testOrderDesc()
     {
-        $repository = new UserRepository();
-        $user = $repository->find()->order(['id' => 'desc'])->first();
+        $user = UserEntityManager::find()->order(['id' => 'desc'])->first();
         $this->assertEquals($user->id, 2);
         $this->assertEquals($user->name, 'user2');
     }

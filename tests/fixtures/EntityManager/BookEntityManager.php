@@ -1,12 +1,12 @@
 <?php
 
-namespace Rmtram\TextDatabase\UnitTest\Fixtures\Repository;
+namespace Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager;
 
-use Rmtram\TextDatabase\Repository\BaseRepository;
+use Rmtram\TextDatabase\EntityManager\BaseEntityManager;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\Book;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\User;
 
-class BookRepository extends BaseRepository
+class BookEntityManager extends BaseEntityManager
 {
     /**
      * @var string
@@ -24,4 +24,5 @@ class BookRepository extends BaseRepository
     protected $belongsTo = [
         'user' => User::class
     ];
+
 }
