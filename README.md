@@ -20,58 +20,101 @@ Builder::make()
     ->table('users', function(Schema $schema) {
     $schema->integer('id')->autoIncrement()->primary();
     $schema->string('name')->notNull();
+    $schema->dateTime('created_at');
+    $schema->dateTime('updated_at');
 });
 
 Builder::make()
-    ->table('books', function(Schema $schema) {
+    ->table('posts', function(Schema $schema) {
     $schema->integer('id')->autoIncrement()->primary();
-    $schema->string('isbn')->unique()->notNull();
     $schema->string('title')->notNull();
     $schema->string('description')->notNull();
     $schema->integer('user_id');
+    $schema->dateTime('created_at');
+    $schema->dateTime('updated_at');
 });
 
 Builder::make()
-    ->table('book_comments', function(Schema $schema) {
+    ->table('comments', function(Schema $schema) {
     $schema->integer('id')->autoIncrement()->primary();
-    $schema->text('body')->notNull();
-    $schema->integer('book_id');
+    $schema->text('comment')->notNull();
+    $schema->integer('post_id');
+    $schema->dateTime('created_at');
+    $schema->dateTime('updated_at');
 });
 ```
 
-Create Repository
+Create EntityManager
 
 ```php
 
-class UserRepository extends Rmtram\TextDatabase\Repository\BaseRepository {
+class UserEntityManager extends BaseEntityManager
+{
+    /**
+     * @var string
+     */
     protected $table = 'users';
-    protected $entityClass = User::class;
+
+    /**
+     * @var string
+     */
+    protected $entity = User::class;
+
+    /**
+     * @var array
+     */
     protected $hasMany = [
-        'books'    => Book::class,
-        'comments' => BookComment::class
+        'posts' => Post::class
     ];
+
 }
 
-class BookRepository extends Rmtram\TextDatabase\Repository\BaseRepository {
-    protected $table = 'books';
-    protected $entityClass = Book::class;
+class PostEntityManager extends BaseEntityManager
+{
+    /**
+     * @var string
+     */
+    protected $table  = 'posts';
+
+    /**
+     * @var string
+     */
+    protected $entity = Post::class;
+
+    /**
+     * @var array
+     */
     protected $belongsTo = [
         'user' => User::class
     ];
+
+    /**
+     * @var array
+     */
     protected $hasMany = [
-        'comments' => BookComment::class
+        'comments' => Comment::class
     ];
 }
 
-class BookCommentRepository extends Rmtram\TextDatabase\Repository\BaseRepository {
-    protected $table = 'book_comments';
-    protected $entityClass = BookComment::class;
+class CommentEntityManager extends BaseEntityManager
+{
+    /**
+     * @var string
+     */
+    protected $table  = 'comments';
+
+    /**
+     * @var string
+     */
+    protected $entity = Comment::class;
+
+    /**
+     * @var array
+     */
     protected $belongsTo = [
-        'book' => Book::class,
-        'user' => User::class
+        'post' => Post::class
     ];
 }
-
 
 ```
 
@@ -79,79 +122,169 @@ Create Entity
 
 ```php
 
-class User extends Rmtram\TextDatabase\Entity\BaseEntity 
+class User extends BaseEntity
 {
+    /**
+     * @var int
+     */
     public $id;
-    public $title;
-    protected $repository = UserRepository::class;
+
+    /**
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @var \DateTime|string
+     */
+    public $created_at;
+
+    /**
+     * @var \DateTime|string
+     */
+    public $updated_at;
+
+    /**
+     * @var string
+     */
+    protected static $entityManager = UserEntityManager::class;
 }
 
-class Book extends Rmtram\TextDatabase\Entity\BaseEntity {
+class Post extends BaseEntity
+{
+    /**
+     * @var int
+     */
     public $id;
-    public $isbn;
+
+    /**
+     * @var string
+     */
     public $title;
+
+    /**
+     * @var string
+     */
     public $description;
+
+    /**
+     * @var int
+     */
     public $user_id;
-    protected $repository = BookRepository::class;
+
+    /**
+     * @var \DateTime|string
+     */
+    public $created_at;
+
+    /**
+     * @var \DateTime|string
+     */
+    public $updated_at;
+
+    /**
+     * @var string
+     */
+    protected static $entityManager = PostEntityManager::class;
 }
 
-class BookComment extends Rmtram\TextDatabase\Entity\BaseEntity {
+class Comment extends BaseEntity
+{
+    /**
+     * @var int
+     */
     public $id;
-    public $body;
-    public $book_id;
-    public $user_id;
-    protected $repository = BookCommentRepository::class;
+
+    /**
+     * @var string
+     */
+    public $comment;
+
+    /**
+     * @var int
+     */
+    public $post_id;
+
+    /**
+     * @var string|\DateTime
+     */
+    public $created_at;
+
+    /**
+     * @var string|\DateTime
+     */
+    public $updated_at;
+
+    /**
+     * @var string
+     */
+    protected static $entityManager = CommentEntityManager::class;
 }
 
 ```
 
-Crud
+### Create, Read, Update, Delete
+
+Create and Update.
 
 ```php
-// Create and Update
-$userRepository = new UserRepository();
-$user = new User();
-$user->id = 1;
-$user->title = 'NickName'
-$userRepository->save($user);
 
-// Read
-$userRepository = new UserRepository();
-$users = $userRepository->find()->all();
+// Create
+$user = new User();
+$user->name = 'NickName'
+$user->created_at = new DateTime();
+$user->updated_at = new DateTime();
+UserEntityManager::save($user);
+
+// Update
+$user = new User();
+$user->id = 1; // primary key.
+$user->name = 'NickName'
+$user->created_at = new DateTime();
+$user->updated_at = new DateTime();
+UserEntityManager::save($user);
+
+```
+
+Read.
+
+```php
+
+$users = UserEntityManager::find()->all();
 foreach ($users as $user) {
+    echo $user->id;
     echo $user->name;
 }
 
-// Read sort
-$userRepository = new UserRepository();
-$user = $userRepository->find()
+// sort
+$users = UserEntityManager::find()
     ->order(['name' => 'asc'])
     ->all();
 
-// Read relation
-$userRepository = new UserRepository();
-$user = $userRepository->find()->first();
-foreach ($user->books as $book) {
-    echo $book->title;
-    foreach ($book->comments as $comment) {
-        echo $comment->body;
+// relation
+$user = UserEntityManager::find()->first();
+foreach ($user->posts as $post) {
+    echo $post->title;
+    foreach ($post->comments as $comment) {
+        echo $comment->comment;
         echo $comment->user->name;
     }
 }
+```
 
-// Delete
+Delete.
+
+```php
 
 // all
-$userRepository = new UserRepository();
-$userRepository->delete();
+UserEntityManager::delete();
 
 // where
 $userRepository = new UserRepository();
-$userRepository->delete(['id' => 1])
+UserEntityManager::delete(['id' => 1])
 
 // entity
-$userRepository = new UserRepository();
-$user = $userRepository->find()->first();
-$userRepository->delete($user);
+$user = UserEntityManager::find()->first();
+UserEntityManager::delete($user);
 
 ```
