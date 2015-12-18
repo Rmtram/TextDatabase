@@ -49,6 +49,7 @@ abstract class BaseEntityManager implements CrudInterface, RelationInterface
     {
         $this->assertTable($this->table);
         $this->assertEntity($this->entity);
+        $this->initialize();
     }
 
     /**
@@ -59,7 +60,6 @@ abstract class BaseEntityManager implements CrudInterface, RelationInterface
         $subClass = get_called_class();
         if (!isset(self::$instances[$subClass])) {
             self::$instances[$subClass] = new static();
-            self::$instances[$subClass]->initialize();
         }
         return self::$instances[$subClass];
     }
@@ -143,8 +143,7 @@ abstract class BaseEntityManager implements CrudInterface, RelationInterface
     private function initialize()
     {
         $reader = new Reader();
-        $static = static::make();
-        $schema = $reader->getSchema($static->table);
+        $schema = $reader->getSchema($this->table);
         foreach ($schema as $variable) {
             if (!is_a($variable['type'], Variable::class, true)) {
                 throw new NotVariableClassException(
