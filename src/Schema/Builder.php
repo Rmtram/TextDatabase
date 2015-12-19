@@ -1,6 +1,7 @@
 <?php
 
 namespace Rmtram\TextDatabase\Schema;
+use Respect\Validation\Validator;
 use Rmtram\TextDatabase\Writer\SchemaWriter;
 
 /**
@@ -66,6 +67,8 @@ class Builder
      */
     public function table($table, \Closure $closure)
     {
+        Validator::type('string')->assert($table);
+        Validator::regex('/^[A-Za-z_]+$/')->assert($table);
         /** @var Schema $schema */
         $schema = new $this->schemaClassName;
         $closure($schema);

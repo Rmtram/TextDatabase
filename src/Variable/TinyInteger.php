@@ -2,17 +2,17 @@
 
 namespace Rmtram\TextDatabase\Variable;
 
-class Integer extends AbstractInteger
+class TinyInteger extends AbstractInteger
 {
-    
-    /**
-     * @var integer
-     */
-    protected $max = 2147483647;
 
     /**
      * @var integer
      */
-    protected $min = -2147483647;
+    protected $max = 127;
+
+    /**
+     * @var integer
+     */
+    protected $min = -127;
 
 }

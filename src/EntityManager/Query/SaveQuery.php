@@ -4,7 +4,7 @@ namespace Rmtram\TextDatabase\EntityManager\Query;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\EntityManager\BaseEntityManager;
-use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\EntityManager\Memory;
 use Rmtram\TextDatabase\EntityManager\Traits\AssertTrait;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
@@ -50,14 +50,14 @@ class SaveQuery
     /**
      * constructor.
      * @param string $entityManager
-     * @param ShareStorage $storage
+     * @param Memory $memory
      */
-    public function __construct($entityManager, ShareStorage $storage)
+    public function __construct($entityManager, Memory $memory)
     {
         $this->assertEntityManager($entityManager);
         $this->entityManager = $entityManager;
-        $this->storage = $storage;
-        $this->items = $storage->get();
+        $this->memory = $memory;
+        $this->items = $memory->get();
     }
 
     /**
@@ -71,7 +71,7 @@ class SaveQuery
         }
         $operator = $this->substitution($entity);
         if ($this->write()) {
-            $this->storage->set($this->items);
+            $this->memory->set($this->items);
             return true;
         }
         if (false === $this->rollback($operator)) {

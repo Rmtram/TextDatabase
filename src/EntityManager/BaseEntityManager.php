@@ -102,8 +102,8 @@ abstract class BaseEntityManager implements CrudInterface, RelationInterface
     public static function find()
     {
         $static = static::make();
-        $storage = ShareStorage::make($static->table);
-        return new SelectQuery($static->entity, $storage);
+        $memory = Memory::make($static->table);
+        return new SelectQuery($static->entity, $memory);
     }
 
     /**
@@ -116,7 +116,7 @@ abstract class BaseEntityManager implements CrudInterface, RelationInterface
     public static function save(BaseEntity $entity)
     {
         $static = static::make();
-        $storage = ShareStorage::make($static->table);
+        $storage = Memory::make($static->table);
         return (new SaveQuery(static::class, $storage))
             ->execute($entity);
     }
@@ -132,7 +132,7 @@ abstract class BaseEntityManager implements CrudInterface, RelationInterface
     public static function delete($target = null)
     {
         $static = static::make();
-        $storage = ShareStorage::make($static->table);
+        $storage = Memory::make($static->table);
         return (new DeleteQuery(static::class, $storage))
             ->execute($target);
     }

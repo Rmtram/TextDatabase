@@ -2,10 +2,9 @@
 
 namespace Rmtram\TextDatabase\EntityManager;
 
-
 use Rmtram\TextDatabase\Reader\Reader;
 
-final class ShareStorage
+final class Memory
 {
     /**
      * @var self

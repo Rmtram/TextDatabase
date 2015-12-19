@@ -1,13 +1,13 @@
 <?php
 
-namespace Rmtram\TextDatabase\UnitTest\Repository;
+namespace Rmtram\TextDatabase\UnitTest\EntityManager;
 
 use Rmtram\TextDatabase\Connection;
-use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\EntityManager\Memory;
 use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\UserEntityManager;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
-class ReadTest extends \PHPUnit_Framework_TestCase
+class DeleteTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
@@ -17,57 +17,53 @@ class ReadTest extends \PHPUnit_Framework_TestCase
         require_once __DIR__ . '/../fixtures/EntityManager/BookEntityManager.php';
         Connection::setPath(__DIR__ . '/../fixtures/storage/');
         $this->addFixtures();
+        foreach (['users', 'books'] as $table) {
+            $memory = Memory::make($table);
+            $ref = new \ReflectionMethod($memory, 'reset');
+            $ref->setAccessible(true);
+            $ref->invoke($memory);
+        }
+
     }
 
-    public function testGetUsers()
+    public function testDeleteUserById1()
     {
+        UserEntityManager::delete(['id' => 1]);
+        $user = UserEntityManager::find()
+            ->where('id', 1)
+            ->first();
+        $this->assertNull($user);
+    }
+
+    public function testDeleteUserByEntity()
+    {
+        $user = UserEntityManager::find()->where('id', 1)->first();
+        $this->assertNotNull($user);
+        UserEntityManager::delete($user);
+        $user = UserEntityManager::find()->where('id', 1)->first();
+        $this->assertNull($user);
+    }
+
+    public function testDeleteUsers()
+    {
+        UserEntityManager::delete();
         $users = UserEntityManager::find()->all();
-        $this->assertEquals($users[0]->id, 1);
-        $this->assertEquals($users[0]->name, 'user1');
+        $this->assertNull($users);
     }
 
-    public function testGetUser()
+    public function testDeleteUserByName1()
     {
-        $user = UserEntityManager::find()->first();
-        $this->assertEquals($user->id, 1);
-        $this->assertEquals($user->name, 'user1');
+        UserEntityManager::delete(['name' => 'user1']);
+        $user = UserEntityManager::find()->where('name', 'user1')->first();
+        $this->assertNull($user);
     }
 
-    public function testGetUserById1()
+    public function testNotDeleteUserByName()
     {
-        $user = UserEntityManager::find()->where('id', 1)->first();
-        $this->assertEquals($user->id, 1);
-        $this->assertEquals($user->name, 'user1');
+        UserEntityManager::delete(['name' => 'user']);
+        $user = UserEntityManager::find()->where('name', 'user1')->first();
+        $this->assertNotNull($user);
     }
-
-    public function testGetUserWithBookById1()
-    {
-        $user = UserEntityManager::find()->where('id', 1)->first();
-        $books = $user->books;
-        $this->assertEquals($books[0]->id, 1);
-        $this->assertEquals($books[1]->id, 2);
-        $this->assertEquals($books[0]->title, 'title1');
-        $this->assertEquals($books[1]->title, 'title2');
-        $this->assertEquals($books[0]->description, 'description1');
-        $this->assertEquals($books[1]->description, 'description2');
-        $this->assertEquals($books[0]->user_id, 1);
-        $this->assertEquals($books[1]->user_id, 1);
-    }
-
-    public function testOrderAsc()
-    {
-        $user = UserEntityManager::find()->order(['id' => 'asc'])->first();
-        $this->assertEquals($user->id, 1);
-        $this->assertEquals($user->name, 'user1');
-    }
-
-    public function testOrderDesc()
-    {
-        $user = UserEntityManager::find()->order(['id' => 'desc'])->first();
-        $this->assertEquals($user->id, 2);
-        $this->assertEquals($user->name, 'user2');
-    }
-
 
     public function tearDown()
     {
