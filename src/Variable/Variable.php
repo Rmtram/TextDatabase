@@ -24,8 +24,9 @@ abstract class Variable
      */
     protected $forces = [
         'primary' => [
-            'unique' => true,
-            'null'   => false
+            'unique'   => true,
+            'unsigned' => true,
+            'null'     => false
         ]
     ];
 
@@ -53,6 +54,7 @@ abstract class Variable
      */
     public function __construct($name)
     {
+        $this->assertName($name);
         $this->setName($name);
         $this->mergeAddAttributesToDefault();
         $this->loadOfDefaultAttributes();
@@ -95,12 +97,29 @@ abstract class Variable
     }
 
     /**
+     * @param $val
+     * @param $min
+     * @param $max
+     * @return bool
+     */
+    protected function between($val, $min, $max)
+    {
+        return $min >= $val && $val <= $max;
+    }
+
+    /**
      * @param $name
      */
     private function setName($name)
     {
-        Validator::notEmpty()->assert($name);
         $this->name = $name;
+    }
+
+    private function assertName($name)
+    {
+        Validator::notEmpty()->assert($name);
+        Validator::type('string')->assert($name);
+        Validator::regex('/^[A-Za-z_]+$/')->assert($name);
     }
 
     /**
@@ -143,4 +162,5 @@ abstract class Variable
             }
         }
     }
+
 }

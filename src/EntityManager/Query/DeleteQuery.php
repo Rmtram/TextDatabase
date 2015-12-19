@@ -3,9 +3,8 @@
 namespace Rmtram\TextDatabase\EntityManager\Query;
 use Rmtram\TextDatabase\Entity\BaseEntity;
 use Rmtram\TextDatabase\EntityManager\BaseEntityManager;
-use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\EntityManager\Memory;
 use Rmtram\TextDatabase\EntityManager\Traits\AssertTrait;
-use Rmtram\TextDatabase\EntityManager\Traits\BindTrait;
 use Rmtram\TextDatabase\EntityManager\Traits\SelectTrait;
 use Rmtram\TextDatabase\Writer\StorageWriter;
 
@@ -22,19 +21,22 @@ class DeleteQuery implements QueryInterface
      */
     private $entityManager;
 
+    /**
+     * @var Memory
+     */
     private $storage;
 
     /**
      * constructor.
      * @param $entityManager
-     * @param ShareStorage $storage
+     * @param Memory $memory
      */
-    public function __construct($entityManager, ShareStorage $storage)
+    public function __construct($entityManager, Memory $memory)
     {
         $this->assertEntityManager($entityManager);
         $this->initializeEvaluation();
         $this->entityManager = $entityManager;
-        $this->storage = $storage;
+        $this->memory = $memory;
     }
 
     /**
@@ -44,7 +46,7 @@ class DeleteQuery implements QueryInterface
     public function execute($target)
     {
         $this->target($target);
-        $items = $this->storage->get();
+        $items = $this->memory->get();
         $before = count($items);
         foreach ($items as $index => $item) {
             if (true === $this->evaluate($item)) {
@@ -56,7 +58,7 @@ class DeleteQuery implements QueryInterface
             return false;
         }
         if ($this->write($items)) {
-            $this->storage->set($items);
+            $this->memory->set($items);
             return true;
         }
         return false;

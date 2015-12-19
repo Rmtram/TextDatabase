@@ -1,7 +1,6 @@
 <?php
 
 namespace Rmtram\TextDatabase\Variable;
-use Rmtram\TextDatabase\Repository\BaseRepository;
 
 /**
  * Class String
@@ -27,7 +26,9 @@ class String extends Variable
      */
     public function length($size)
     {
-        $this->setAttribute('length', $size);
+        if (0 > $size && $size < static::MAX_SIZE) {
+            $this->setAttribute('length', $size);
+        }
         return $this;
     }
 
@@ -38,6 +39,10 @@ class String extends Variable
     protected function prohibit($value)
     {
         if (is_array($value) || is_object($value)) {
+            return true;
+        }
+        $maxLength = $this->getAttribute('length');
+        if (!is_null($value) && (strlen($value) > $maxLength)) {
             return true;
         }
         $value = $value ? strval($value) : $value;

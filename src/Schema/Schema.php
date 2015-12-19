@@ -1,17 +1,22 @@
 <?php
 
 namespace Rmtram\TextDatabase\Schema;
+use Respect\Validation\Validator;
 use Rmtram\TextDatabase\Variable\Integer;
+use Rmtram\TextDatabase\Variable\SmallInteger;
 use Rmtram\TextDatabase\Variable\String;
 use Rmtram\TextDatabase\Variable\Date;
 use Rmtram\TextDatabase\Variable\DateTime;
 use Rmtram\TextDatabase\Variable\Text;
+use Rmtram\TextDatabase\Variable\TinyInteger;
 use Rmtram\TextDatabase\Variable\Variable;
 
 /**
  * Class Schema
  * @package Rmtram\TextDatabase\Schema
  * @method \Rmtram\TextDatabase\Variable\Integer integer(String $name)
+ * @method \Rmtram\TextDatabase\Variable\SmallInteger smallInteger(String $name)
+ * @method \Rmtram\TextDatabase\Variable\TinyInteger tinyInteger(String $name)
  * @method \Rmtram\TextDatabase\Variable\String string(String $name)
  * @method \Rmtram\TextDatabase\Variable\Date date(String $name)
  * @method \Rmtram\TextDatabase\Variable\DateTime dateTime(String $name)
@@ -27,12 +32,19 @@ class Schema
     /**
      * @var array
      */
+    protected $unique = [];
+
+    /**
+     * @var array
+     */
     protected $variableClasses = [
-        'integer'  => Integer::class,
-        'string'   => String::class,
-        'date'     => Date::class,
-        'dateTime' => DateTime::class,
-        'text'     => Text::class
+        'integer'      => Integer::class,
+        'smallInteger' => SmallInteger::class,
+        'tinyInteger'  => TinyInteger::class,
+        'string'       => String::class,
+        'text'         => Text::class,
+        'date'         => Date::class,
+        'dateTime'     => DateTime::class
     ];
 
     /**
@@ -44,14 +56,17 @@ class Schema
     {
         if (!isset($this->variableClasses[$className])) {
             throw new \BadMethodCallException(
-                'undefined variable class ' . $className);
+                'bad!! undefined variable class => ' . $className);
         }
-        if (empty($args)) {
-            throw new \InvalidArgumentException(
-                'bad arguments empty, ' . $className);
-        }
+
+        $this->assertArgs($args);
+
+        $this->unique[$args[0]] = true;
+
         $reflection = new \ReflectionClass(
             $this->variableClasses[$className]);
+
+        /** @var Variable $variable */
         $variable = $reflection->newInstanceArgs($args);
         $this->variables[] = $variable;
         return $variable;
@@ -93,5 +108,25 @@ class Schema
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param array $args
+     */
+    private function assertArgs($args)
+    {
+        if (empty($args[0])) {
+            throw new \InvalidArgumentException(
+                'bad!! arguments empty => ');
+        }
+        if (!is_string($args[0])) {
+            throw new \InvalidArgumentException(
+                'bad!! first arg is string only.'
+            );
+        }
+        if (array_key_exists($args[0], $this->unique)) {
+            throw new \InvalidArgumentException(
+                'bad!! exists field name => ' . $args[0]);
+        }
     }
 }

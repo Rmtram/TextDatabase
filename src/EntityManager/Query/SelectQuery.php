@@ -3,7 +3,7 @@
 namespace Rmtram\TextDatabase\EntityManager\Query;
 
 use Rmtram\TextDatabase\Entity\BaseEntity;
-use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\EntityManager\Memory;
 use Rmtram\TextDatabase\EntityManager\Traits\AssertTrait;
 use Rmtram\TextDatabase\EntityManager\Traits\SelectTrait;
 
@@ -29,13 +29,13 @@ class SelectQuery implements QueryInterface
     /**
      * constructor.
      * @param $classEntity
-     * @param ShareStorage $storage
+     * @param Memory $memory
      */
-    public function __construct($classEntity, ShareStorage $storage)
+    public function __construct($classEntity, Memory $memory)
     {
         $this->assertEntity($classEntity);
         $this->initializeEvaluation();
-        $this->storage = $storage;
+        $this->memory = $memory;
         $this->classEntity = $classEntity;
     }
 
@@ -63,7 +63,7 @@ class SelectQuery implements QueryInterface
      */
     public function uniqueIndex()
     {
-        $items = $this->storage->get();
+        $items = $this->memory->get();
         foreach ($items as $index => $item) {
             if (true === $this->evaluate($item)) {
                 return $index;
@@ -107,7 +107,7 @@ class SelectQuery implements QueryInterface
     protected function orderExecute($first)
     {
         $tmp = [];
-        $items = $this->storage->get();
+        $items = $this->memory->get();
         foreach ($items as $item) {
             if (true === $this->evaluate($item)) {
                 $tmp[] = $item;
@@ -132,7 +132,7 @@ class SelectQuery implements QueryInterface
     protected function notOrderExecute($first)
     {
         $entities = [];
-        $items = $this->storage->get();
+        $items = $this->memory->get();
         foreach ($items as $item) {
             if (true === $this->evaluate($item)) {
                 $entity = $this->createEntity($item);

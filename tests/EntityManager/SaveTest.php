@@ -1,12 +1,11 @@
 <?php
 
-namespace Rmtram\TextDatabase\UnitTest\Repository;
+namespace Rmtram\TextDatabase\UnitTest\EntityManager;
 
 use Rmtram\TextDatabase\Connection;
-use Rmtram\TextDatabase\EntityManager\ShareStorage;
+use Rmtram\TextDatabase\EntityManager\Memory;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\User;
 use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\UserEntityManager;
-use Rmtram\TextDatabase\UnitTest\Fixtures\Repository\UserRepository;
 
 class SaveTest extends \PHPUnit_Framework_TestCase
 {
@@ -16,10 +15,10 @@ class SaveTest extends \PHPUnit_Framework_TestCase
         require_once __DIR__ . '/../fixtures/EntityManager/UserEntityManager.php';
         Connection::setPath(__DIR__ . '/../fixtures/storage/');
         foreach (['users', 'books'] as $table) {
-            $share = ShareStorage::make($table);
-            $ref = new \ReflectionMethod($share, 'reset');
+            $memory = Memory::make($table);
+            $ref = new \ReflectionMethod($memory, 'reset');
             $ref->setAccessible(true);
-            $ref->invoke($share);
+            $ref->invoke($memory);
         }
     }
 
