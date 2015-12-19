@@ -24,7 +24,7 @@
   "require": {
     "php": ">= 5.5.0",
     "respect/validation": "~1.0",
-    "braincrafted/arrayquery": "dev-master",
+    "braincrafted/arrayquery": "v0.1",
     "cakephp/filesystem": "~3.1",
     "doctrine/inflector": "~1.1"
   },
