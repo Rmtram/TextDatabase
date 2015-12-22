@@ -52,7 +52,7 @@ abstract class AbstractInteger extends Variable
 
         $primary  = $this->getAttribute('primary');
         $unsigned = $this->getAttribute('unsigned');
-        $pattern = false === $primary && false === $unsigned ? '/^-{0,1}[0-9]+$/' : '/^[0-9]$/';
+        $pattern = false === $primary && false === $unsigned ? '/^-{0,1}[0-9]+$/' : '/^[0-9]+$/';
 
         if (!preg_match($pattern, $value)) {
             return true;

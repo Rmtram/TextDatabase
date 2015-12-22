@@ -104,7 +104,7 @@ abstract class Variable
      */
     protected function between($val, $min, $max)
     {
-        return $min >= $val && $val <= $max;
+        return $val >= $min && $val <= $max;
     }
 
     /**

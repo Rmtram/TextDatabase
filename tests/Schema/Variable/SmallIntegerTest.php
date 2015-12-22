@@ -9,7 +9,7 @@ use Rmtram\TextDatabase\Schema\Schema;
 use Rmtram\TextDatabase\UnitTest\Fixtures\Entity\Test;
 use Rmtram\TextDatabase\UnitTest\Fixtures\EntityManager\TestEntityManager;
 
-class IntegerTest extends \PHPUnit_Framework_TestCase
+class SmallIntegerTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
@@ -86,32 +86,28 @@ class IntegerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($bool);
     }
 
-    public function testSaveById1000000000000000000()
+    public function testSaveById1000000()
     {
         $this->createTable(false);
         $test = new Test();
-        $test->id = 1000000000000000000;
+        $test->id = 10000000000;
         $bool = TestEntityManager::save($test);
         $this->assertFalse($bool);
     }
-
 
     public function tearDown()
     {
         $this->clear();
     }
 
-    private function createTable($autoIncrement = false, $primary = true, $unsigned = true)
+    private function createTable($autoIncrement = false)
     {
         return Builder::make()
-            ->table('tests', function(Schema $schema) use($autoIncrement, $primary, $unsigned) {
-                $int = $schema->integer('id')
+            ->table('tests', function(Schema $schema) use($autoIncrement) {
+                $schema->smallInteger('id')
+                    ->primary()
                     ->notNull()
-                    ->autoIncrement($autoIncrement)
-                    ->unsigned($unsigned);
-                if (true === $primary) {
-                    $int->primary();
-                }
+                    ->autoIncrement($autoIncrement);
             });
     }
 
